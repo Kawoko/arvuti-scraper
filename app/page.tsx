@@ -70,7 +70,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
               <p className="text-xs text-muted-foreground">Page {list.page} of {list.pageCount}</p>
             </div>
 
-            <ProductList rows={list.rows} />
+            <ProductList rows={list.rows} filters={filters} />
 
             <Pagination filters={filters} pageCount={list.pageCount} />
           </>

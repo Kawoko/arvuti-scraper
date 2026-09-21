@@ -15,10 +15,16 @@ import {
 } from "@/components/ui/select";
 import {
   AVAILABILITY_OPTIONS,
+  DEFAULT_DIRECTION,
+  DEFAULT_SORT,
   DISCOUNT_OPTIONS,
   PRICE_STATUS_OPTIONS,
   SORT_OPTIONS,
+  buildProductHref,
   countActiveFilters,
+  describeSort,
+  sortOptionValue,
+  withoutFilters,
   type ProductFilters,
 } from "@/lib/filters";
 import type { FilterFacets } from "@/lib/queries/products";
@@ -41,16 +47,21 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
 
   const busy = isPending;
 
-  const setParam = useCallback(
-    (key: string, value: string | null) => {
+  /** Apply several query-string changes at once, resetting pagination. */
+  const applyParams = useCallback(
+    (changes: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams.toString());
-      if (value === null || value === "" || value === ALL) {
-        params.delete(key);
-      } else {
-        params.set(key, value);
+
+      for (const [key, value] of Object.entries(changes)) {
+        if (value === null || value === "" || value === ALL) {
+          params.delete(key);
+        } else {
+          params.set(key, value);
+        }
       }
-      // Any filter change resets pagination so results are not skipped.
-      if (key !== "page") params.delete("page");
+
+      // Any filter or sort change resets pagination so results are not skipped.
+      if (!("page" in changes)) params.delete("page");
 
       const query = params.toString();
       startTransition(() => {
@@ -58,6 +69,11 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
       });
     },
     [pathname, router, searchParams],
+  );
+
+  const setParam = useCallback(
+    (key: string, value: string | null) => applyParams({ [key]: value }),
+    [applyParams],
   );
 
   // Keep the input in sync when the URL changes from elsewhere (e.g. Reset).
@@ -75,6 +91,7 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
   }, [filters.q, searchValue, setParam]);
 
   const activeCount = countActiveFilters(filters);
+  const sortValue = sortOptionValue(filters.sort, filters.dir);
 
   return (
     <div className="rounded-xl border border-border bg-card p-3 shadow-xs sm:p-4">
@@ -91,10 +108,22 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
             />
           </div>
 
-          <div className="sm:w-56">
-            <Select value={filters.sort} onValueChange={(value) => setParam("sort", value)}>
+          <div className="sm:w-60">
+            <Select
+              value={sortValue}
+              onValueChange={(value) => {
+                const [sort, dir] = value.split(":");
+                // Omit anything at its default so the URL stays clean.
+                applyParams({
+                  sort: sort === DEFAULT_SORT ? null : (sort ?? null),
+                  dir: dir === DEFAULT_DIRECTION ? null : (dir ?? null),
+                });
+              }}
+            >
               <SelectTrigger aria-label="Sort products">
-                <SelectValue placeholder="Sort" />
+                {/* Radix only shows the placeholder when no item matches, which
+                    happens after a column header sets a non-preset ordering. */}
+                <SelectValue placeholder={describeSort(filters.sort, filters.dir)} />
               </SelectTrigger>
               <SelectContent>
                 {SORT_OPTIONS.map((option) => (
@@ -108,10 +137,7 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-          <Select
-            value={filters.brand || ALL}
-            onValueChange={(value) => setParam("brand", value)}
-          >
+          <Select value={filters.brand || ALL} onValueChange={(value) => setParam("brand", value)}>
             <SelectTrigger aria-label="Filter by brand">
               <SelectValue placeholder="Brand" />
             </SelectTrigger>
@@ -156,10 +182,7 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
             </SelectContent>
           </Select>
 
-          <Select
-            value={filters.casLatency || ALL}
-            onValueChange={(value) => setParam("cl", value)}
-          >
+          <Select value={filters.casLatency || ALL} onValueChange={(value) => setParam("cl", value)}>
             <SelectTrigger aria-label="Filter by CAS latency">
               <SelectValue placeholder="CL" />
             </SelectTrigger>
@@ -233,9 +256,13 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
           <span aria-live="polite" className={cn(busy && "opacity-60")}>
             {busy ? "Updating…" : `${total} product${total === 1 ? "" : "s"}`}
+          </span>
+
+          <span className="hidden items-center gap-1.5 sm:flex">
+            Sorted by {describeSort(filters.sort, filters.dir)}
           </span>
 
           {activeCount > 0 ? (
@@ -245,7 +272,12 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
               size="sm"
               onClick={() => {
                 setSearchValue("");
-                startTransition(() => router.replace(pathname, { scroll: false }));
+                // Clears filters but keeps the chosen sort order.
+                startTransition(() =>
+                  router.replace(buildProductHref(pathname, withoutFilters(filters)), {
+                    scroll: false,
+                  }),
+                );
               }}
             >
               <X />

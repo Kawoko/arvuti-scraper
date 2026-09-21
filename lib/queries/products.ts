@@ -87,28 +87,36 @@ export async function getProductList(filters: ProductFilters): Promise<ProductLi
   const discount = minDiscountValue(filters);
   if (discount !== null) query = query.lte("price_change_percent", -discount);
 
+  // Sorting is a column + direction pair, so a table header can flip either
+  // direction for the column it owns.
+  const ascending = filters.dir === "asc";
+
   switch (filters.sort) {
-    case "price_asc":
-      query = query.order("current_price", { ascending: true });
+    case "price":
+      query = query.order("current_price", { ascending });
       break;
-    case "price_desc":
-      query = query.order("current_price", { ascending: false });
+    case "start":
+      query = query.order("start_price", { ascending });
       break;
-    case "cl_asc":
-      query = query.order("cas_latency", { ascending: true, nullsFirst: false });
+    case "lowest":
+      query = query.order("lowest_price", { ascending });
       break;
-    case "speed_desc":
-      query = query.order("speed_mhz", { ascending: false, nullsFirst: false });
+    case "cl":
+      // NULLS LAST in both directions: unknown latency is never "best".
+      query = query.order("cas_latency", { ascending, nullsFirst: false });
       break;
-    case "recent":
-      query = query.order("current_observed_at", { ascending: false });
+    case "speed":
+      query = query.order("speed_mhz", { ascending, nullsFirst: false });
+      break;
+    case "updated":
+      query = query.order("current_observed_at", { ascending });
       break;
     case "name":
-      query = query.order("name", { ascending: true });
+      query = query.order("name", { ascending });
       break;
-    case "biggest_drop":
+    case "change":
     default:
-      query = query.order("price_change_percent", { ascending: true, nullsFirst: false });
+      query = query.order("price_change_percent", { ascending, nullsFirst: false });
       break;
   }
 

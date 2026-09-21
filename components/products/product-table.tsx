@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 
 import {
   Table,
@@ -8,27 +9,108 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { buildSortHref, type ProductFilters, type SortColumn, type SortDirection } from "@/lib/filters";
 import { EMPTY_VALUE, formatCurrency, formatDayMonth } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
+import { cn } from "@/lib/utils";
 import type { ProductPriceSummaryRow } from "@/types/database";
 
 import { PriceChange } from "./price-change";
 import { StockBadge } from "./stock-badge";
 
-export function ProductTable({ rows }: { rows: ProductPriceSummaryRow[] }) {
+function SortArrow({ active, dir }: { active: boolean; dir: SortDirection }) {
+  if (!active) {
+    return (
+      <ChevronsUpDown
+        aria-hidden
+        className="size-3.5 text-muted-foreground/40 transition-colors duration-150 group-hover:text-muted-foreground"
+      />
+    );
+  }
+
+  const Icon = dir === "asc" ? ChevronUp : ChevronDown;
+  return <Icon aria-hidden className="size-3.5" />;
+}
+
+interface SortableHeaderProps {
+  column: SortColumn;
+  label: string;
+  filters: ProductFilters;
+  pathname: string;
+  align?: "left" | "right";
+  className?: string;
+}
+
+/**
+ * Clickable column header. Renders a link so the sort lives in the URL and the
+ * table stays a Server Component.
+ */
+function SortableHeader({
+  column,
+  label,
+  filters,
+  pathname,
+  align = "right",
+  className,
+}: SortableHeaderProps) {
+  const active = filters.sort === column;
+
+  return (
+    <TableHead
+      aria-sort={active ? (filters.dir === "asc" ? "ascending" : "descending") : "none"}
+      className={cn(align === "right" && "text-right", className)}
+    >
+      <Link
+        href={buildSortHref(pathname, filters, column)}
+        scroll={false}
+        title={`Sort by ${label.toLowerCase()}`}
+        className={cn(
+          "group -mx-1 inline-flex items-center gap-1 rounded-md px-1 py-0.5 transition-colors duration-150",
+          "hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40",
+          active ? "text-foreground" : "text-muted-foreground",
+          align === "right" && "flex-row-reverse",
+        )}
+      >
+        {label}
+        <SortArrow active={active} dir={filters.dir} />
+      </Link>
+    </TableHead>
+  );
+}
+
+interface ProductTableProps {
+  rows: ProductPriceSummaryRow[];
+  filters: ProductFilters;
+  pathname?: string;
+}
+
+export function ProductTable({ rows, filters, pathname = "/" }: ProductTableProps) {
   return (
     <div className="rounded-xl border border-border bg-card shadow-xs">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="pl-5">Product</TableHead>
+            <SortableHeader
+              column="name"
+              label="Product"
+              filters={filters}
+              pathname={pathname}
+              align="left"
+              className="pl-5"
+            />
             <TableHead>Specs</TableHead>
-            <TableHead className="text-right">Current</TableHead>
-            <TableHead className="text-right">Start</TableHead>
-            <TableHead className="text-right">Change</TableHead>
-            <TableHead className="text-right">Lowest</TableHead>
+            <SortableHeader column="price" label="Current" filters={filters} pathname={pathname} />
+            <SortableHeader column="start" label="Start" filters={filters} pathname={pathname} />
+            <SortableHeader column="change" label="Change" filters={filters} pathname={pathname} />
+            <SortableHeader column="lowest" label="Lowest" filters={filters} pathname={pathname} />
             <TableHead className="pl-5">Stock</TableHead>
-            <TableHead className="pr-5 text-right">Last updated</TableHead>
+            <SortableHeader
+              column="updated"
+              label="Last updated"
+              filters={filters}
+              pathname={pathname}
+              className="pr-5"
+            />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -64,7 +146,11 @@ export function ProductTable({ rows }: { rows: ProductPriceSummaryRow[] }) {
                 </TableCell>
 
                 <TableCell className="text-right text-sm">
-                  <PriceChange change={row.price_change} percent={row.price_change_percent} className="justify-end" />
+                  <PriceChange
+                    change={row.price_change}
+                    percent={row.price_change_percent}
+                    className="justify-end"
+                  />
                 </TableCell>
 
                 <TableCell className="text-right text-sm tabular">

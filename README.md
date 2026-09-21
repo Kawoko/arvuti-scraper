@@ -237,6 +237,40 @@ Running it a second time on the same Estonian day:
 
 ---
 
+## Sorting and filters
+
+Every filter, the sort column and the sort direction live in the URL, so any view
+is shareable and bookmarkable.
+
+**Sorting.** On desktop, click any column header to sort by it; click it again to
+reverse the direction. The active header shows `^` for ascending or `v` for
+descending, and inactive headers show a faint `↕`. The direction is also exposed
+to screen readers through `aria-sort`. On mobile (where cards replace the table)
+the **sort** control in the toolbar does the same job, and the toolbar always
+prints the current ordering as "Sorted by …".
+
+Each column has a sensible first-click direction: price, start price and lowest
+price sort ascending (cheapest first), speed sorts descending (fastest first),
+last-updated sorts descending (newest first), and price change sorts ascending so
+the biggest drop appears first.
+
+| Column header | URL | Sorts by |
+| --- | --- | --- |
+| Product | `sort=name` | Product name |
+| Current | `sort=price` | Latest recorded price |
+| Start | `sort=start` | Our first recorded price |
+| Change | `sort=change` | Percentage change from the starting price |
+| Lowest | `sort=lowest` | Lowest recorded price |
+| Last updated | `sort=updated` | Most recent observation |
+
+The toolbar's sort control additionally exposes orderings that have no column
+header: lowest CL (`sort=cl`) and highest speed (`sort=speed`).
+
+Direction is a separate parameter (`dir=asc` or `dir=desc`) and defaults to `asc`,
+so URLs stay short. Anything at its default is omitted entirely. Changing the
+sort or any filter resets to page 1, and "Clear filters" deliberately keeps the
+chosen sort order.
+
 ## Debugging the scraper
 
 ### Verify the request without contacting Arvutitark
