@@ -1,0 +1,156 @@
+{
+  "current_page": 1,
+  "last_page": 1,
+  "per_page": 200,
+  "total": 2,
+  "data": [
+    {
+      "id": 1526679,
+      "active": true,
+      "type": "PRODUCT",
+      "name": {
+        "en": "PNY Performance DDR5 8GB 5600MHz CL40 Memory"
+      },
+      "primary_category_id": 20,
+      "price": 131.8,
+      "original_price": 131.8,
+      "price_wo_vat": 106.29,
+      "price_updated_at": "2026-09-21T08:02:28.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/malud-ram/pny-performance-ddr5-8gb-5600mhz",
+        "en": "/en/pc-components/memory-ram/pny-performance-ddr5-8gb-5600mhz",
+        "ru": "/ru/pc-components/memory-ram/pny-performance-ddr5-8gb-5600mhz"
+      },
+      "main_attributes": [
+        {
+          "id": 27,
+          "name": { "en": "Capacity", "et": "Maht" },
+          "values": { "en": ["8 GB"] }
+        },
+        {
+          "id": 28,
+          "name": { "en": "Speed", "et": "Kiirus" },
+          "values": { "en": ["5600 MHz"] }
+        },
+        {
+          "id": 178,
+          "name": { "en": "Type" },
+          "values": { "en": ["DDR5"] }
+        },
+        {
+          "id": 179,
+          "name": { "en": "CL" },
+          "values": { "en": ["40"] }
+        }
+      ],
+      "technical_details": [
+        {
+          "name": { "en": "Technical Details", "et": "Tehnilised andmed" },
+          "attributes": [
+            {
+              "id": 27,
+              "name": { "en": "Capacity" },
+              "values": { "en": ["8 GB"] }
+            },
+            {
+              "id": 178,
+              "name": { "en": "Type" },
+              "values": { "en": ["DDR5"] }
+            },
+            {
+              "id": 28,
+              "name": { "en": "Speed" },
+              "values": { "en": ["5600 MHz"] }
+            },
+            {
+              "id": 179,
+              "name": { "en": "CL" },
+              "values": { "en": ["40"] }
+            },
+            {
+              "id": 181,
+              "name": { "en": "Form Factor" },
+              "values": { "en": ["UDIMM"] }
+            },
+            {
+              "id": 182,
+              "name": { "en": "Voltage" },
+              "values": { "en": ["1.2 V"] }
+            },
+            {
+              "id": 180,
+              "name": { "en": "Layout" },
+              "values": { "en": ["1"] }
+            }
+          ]
+        }
+      ],
+      "brand_name": "PNY",
+      "stock": {
+        "delivery_time_in_days": { "from": 4, "to": 8 },
+        "warehouse": 30,
+        "in_stock": 0,
+        "shops": { "8": 0 }
+      },
+      "sku": "MD8GSD5600-PNY",
+      "ean": "4713008451236"
+    },
+    {
+      "id": 1526680,
+      "active": true,
+      "type": "PRODUCT",
+      "name": {
+        "en": "Crucial DDR5 16GB 5600MHz CL46 Memory"
+      },
+      "primary_category_id": 20,
+      "price": 59.9,
+      "original_price": 64.9,
+      "price_wo_vat": 48.31,
+      "price_updated_at": "2026-09-21T07:15:00.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/malud-ram/crucial-ddr5-16gb-5600mhz",
+        "en": "/en/pc-components/memory-ram/crucial-ddr5-16gb-5600mhz"
+      },
+      "main_attributes": [
+        {
+          "id": 27,
+          "name": { "en": "Capacity", "et": "Maht" },
+          "values": { "en": ["16 GB"] }
+        },
+        {
+          "id": 28,
+          "name": { "en": "Speed", "et": "Kiirus" },
+          "values": { "en": ["5600 MHz"] }
+        },
+        {
+          "id": 178,
+          "name": { "en": "Type" },
+          "values": { "en": ["DDR5"] }
+        },
+        {
+          "id": 179,
+          "name": { "en": "CL" },
+          "values": { "en": ["46"] }
+        },
+        {
+          "id": 180,
+          "name": { "en": "Layout" },
+          "values": { "en": ["1 x 16 GB"] }
+        },
+        {
+          "id": 181,
+          "name": { "en": "Form Factor" },
+          "values": { "en": ["UDIMM"] }
+        }
+      ],
+      "brand_name": "Crucial",
+      "stock": {
+        "warehouse": 12,
+        "in_stock": 0,
+        "shops": { "1": 2, "4": 0 }
+      },
+      "sku": "CT16G56C46U5",
+      "ean": "0649528933725"
+    }
+  ]
+}

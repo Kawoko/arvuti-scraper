@@ -1,0 +1,117 @@
+{
+  "data": [
+    {
+      "id": 1528502,
+      "name": {
+        "et": "G.Skill Flare X5 AMD DDR5 32GB 6000MHz CL30 mälu",
+        "en": "G.Skill Flare X5 AMD DDR5 32GB 6000MHz CL30 RAM"
+      },
+      "price": 159.9,
+      "original_price": 189.9,
+      "price_updated_at": "2026-09-21T06:34:53.000000Z",
+      "brand_name": "G.Skill",
+      "path": "arvutikomponendid/malud-ram/gskill-flare-x5-32gb",
+      "sku": "F5-6000J3038F16GX2-FX5",
+      "ean": "4711549511204",
+      "stock": {
+        "warehouse": 50,
+        "in_stock": 0,
+        "shops": { "4": 0, "7": 2, "10": 0 }
+      },
+      "technical_details": [
+        { "id": 27, "value": "32 GB" },
+        { "id": 28, "value": "6000 MHz" },
+        { "id": 178, "value": "DDR5" },
+        { "id": 179, "value": "CL30 (30-38-38-96)" },
+        { "id": 180, "value": "2 x 16 GB" },
+        { "id": 181, "value": "UDIMM" },
+        { "id": 182, "value": "1.35 V" }
+      ]
+    },
+    {
+      "id": 1528503,
+      "name": {
+        "et": "Kingston Fury Beast DDR5 8GB 5600MHz CL36",
+        "en": "Kingston Fury Beast DDR5 8GB 5600MHz CL36"
+      },
+      "price": 39.9,
+      "original_price": 39.9,
+      "price_updated_at": "2026-09-20T05:00:00.000000Z",
+      "brand_name": "Kingston",
+      "path": "arvutikomponendid/malud-ram/kingston-fury-beast-8gb",
+      "sku": "KF556C36BBE-8",
+      "ean": "0740617328738",
+      "stock": {
+        "warehouse": 0,
+        "in_stock": 0,
+        "shops": {}
+      },
+      "main_attributes": {
+        "27": "8",
+        "28": "5600",
+        "178": "DDR5",
+        "179": "36",
+        "180": "1",
+        "181": "UDIMM"
+      }
+    },
+    {
+      "id": 1528504,
+      "name": {
+        "et": "Crucial DDR5 16GB 4800MHz CL40 UDIMM",
+        "en": "Crucial DDR5 16GB 4800MHz CL40 UDIMM"
+      },
+      "price": 49.9,
+      "original_price": 49.9,
+      "price_updated_at": "2026-09-19T05:00:00.000000Z",
+      "brand_name": "Crucial",
+      "path": "arvutikomponendid/malud-ram/crucial-16gb-4800",
+      "sku": "CT16G48C40U5",
+      "ean": "0649528903674",
+      "stock": { "warehouse": 12, "in_stock": 0, "shops": { "1": 1 } },
+      "main_attributes": {
+        "27": "16 GB",
+        "28": "4800 MHz",
+        "178": "DDR5",
+        "179": "CL40",
+        "180": "1 x 16 GB",
+        "181": "UDIMM"
+      }
+    },
+    {
+      "id": 1528502,
+      "name": {
+        "et": "G.Skill Flare X5 AMD DDR5 32GB 6000MHz CL30 mälu",
+        "en": "G.Skill Flare X5 AMD DDR5 32GB 6000MHz CL30 RAM"
+      },
+      "price": 159.9,
+      "original_price": 189.9,
+      "price_updated_at": "2026-09-21T06:34:53.000000Z",
+      "brand_name": "G.Skill",
+      "path": "arvutikomponendid/malud-ram/gskill-flare-x5-32gb",
+      "sku": "F5-6000J3038F16GX2-FX5",
+      "ean": "4711549511204",
+      "stock": { "warehouse": 50, "in_stock": 0, "shops": { "7": 2 } },
+      "technical_details": [
+        { "id": 27, "value": "32 GB" },
+        { "id": 28, "value": "6000 MHz" }
+      ]
+    },
+    {
+      "id": 1528506,
+      "name": {
+        "et": "Puudulik toode ilma hinnata",
+        "en": "Incomplete product without a price"
+      },
+      "price": null,
+      "brand_name": "Unknown",
+      "path": "arvutikomponendid/malud-ram/unknown"
+    }
+  ],
+  "meta": {
+    "current_page": 1,
+    "last_page": 2,
+    "per_page": 200,
+    "total": 240
+  }
+}

@@ -1,0 +1,51 @@
+name: Daily Arvutitark scrape
+
+on:
+  schedule:
+    # Invoked hourly. The scraper itself guarantees at most ONE Arvutitark
+    # request per Europe/Tallinn calendar day, so most invocations are cheap
+    # no-ops that simply exit. Running hourly means a machine that was offline
+    # in the morning still collects the day as soon as it comes back.
+    - cron: "0 * * * *"
+  # Allows a manual run from the Actions tab (e.g. after a failure, or to
+  # collect the day immediately).
+  workflow_dispatch:
+
+# Never allow two scrape jobs to overlap.
+concurrency:
+  group: arvutitark-scrape
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    name: Run scraper
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run scraper
+        # Secrets are injected at runtime only and are never echoed or written
+        # to disk. The Supabase secret key must never be exposed client-side.
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          ARVUTITARK_BASE_URL: ${{ vars.ARVUTITARK_BASE_URL || 'https://cms.arvutitark.ee/api/products' }}
+          ARVUTITARK_REQUEST_TIMEOUT_MS: ${{ vars.ARVUTITARK_REQUEST_TIMEOUT_MS || '20000' }}
+          ARVUTITARK_PAGE_DELAY_MS: ${{ vars.ARVUTITARK_PAGE_DELAY_MS || '750' }}
+          ARVUTITARK_MAX_PAGES: ${{ vars.ARVUTITARK_MAX_PAGES || '50' }}
+        run: npm run scrape
