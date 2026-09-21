@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { CategoryDefinition } from "@/lib/categories";
 import {
   AVAILABILITY_OPTIONS,
   DEFAULT_DIRECTION,
@@ -36,9 +37,10 @@ interface FilterToolbarProps {
   filters: ProductFilters;
   facets: FilterFacets;
   total: number;
+  definition: CategoryDefinition;
 }
 
-export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
+export function FilterToolbar({ filters, facets, total, definition }: FilterToolbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -46,6 +48,8 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
   const [searchValue, setSearchValue] = useState(filters.q);
 
   const busy = isPending;
+  const capacityLabel = definition.capacityLabel;
+  const capacityLower = capacityLabel.toLowerCase();
 
   /** Apply several query-string changes at once, resetting pagination. */
   const applyParams = useCallback(
@@ -151,67 +155,81 @@ export function FilterToolbar({ filters, facets, total }: FilterToolbarProps) {
             </SelectContent>
           </Select>
 
-          <Select
-            value={filters.capacityGb || ALL}
-            onValueChange={(value) => setParam("capacity", value)}
-          >
-            <SelectTrigger aria-label="Filter by capacity">
-              <SelectValue placeholder="Capacity" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Any capacity</SelectItem>
-              {facets.capacities.map((capacity) => (
-                <SelectItem key={capacity} value={String(capacity)}>
-                  {capacity} GB
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {definition.facets.capacity ? (
+            <Select
+              value={filters.capacityGb || ALL}
+              onValueChange={(value) => setParam("capacity", value)}
+            >
+              <SelectTrigger aria-label={`Filter by ${capacityLower}`}>
+                <SelectValue placeholder={capacityLabel} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Any {capacityLower}</SelectItem>
+                {facets.capacities.map((capacity) => (
+                  <SelectItem key={capacity} value={String(capacity)}>
+                    {capacity} GB
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
 
-          <Select value={filters.speedMhz || ALL} onValueChange={(value) => setParam("speed", value)}>
-            <SelectTrigger aria-label="Filter by speed">
-              <SelectValue placeholder="Speed" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Any speed</SelectItem>
-              {facets.speeds.map((speed) => (
-                <SelectItem key={speed} value={String(speed)}>
-                  {speed} MHz
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {definition.facets.speed ? (
+            <Select
+              value={filters.speedMhz || ALL}
+              onValueChange={(value) => setParam("speed", value)}
+            >
+              <SelectTrigger aria-label="Filter by speed">
+                <SelectValue placeholder="Speed" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Any speed</SelectItem>
+                {facets.speeds.map((speed) => (
+                  <SelectItem key={speed} value={String(speed)}>
+                    {speed} MHz
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
 
-          <Select value={filters.casLatency || ALL} onValueChange={(value) => setParam("cl", value)}>
-            <SelectTrigger aria-label="Filter by CAS latency">
-              <SelectValue placeholder="CL" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Any CL</SelectItem>
-              {facets.casLatencies.map((casLatency) => (
-                <SelectItem key={casLatency} value={String(casLatency)}>
-                  CL{casLatency}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {definition.facets.casLatency ? (
+            <Select
+              value={filters.casLatency || ALL}
+              onValueChange={(value) => setParam("cl", value)}
+            >
+              <SelectTrigger aria-label="Filter by CAS latency">
+                <SelectValue placeholder="CL" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Any CL</SelectItem>
+                {facets.casLatencies.map((casLatency) => (
+                  <SelectItem key={casLatency} value={String(casLatency)}>
+                    CL{casLatency}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
 
-          <Select
-            value={filters.moduleCount || ALL}
-            onValueChange={(value) => setParam("modules", value)}
-          >
-            <SelectTrigger aria-label="Filter by module configuration">
-              <SelectValue placeholder="Modules" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>Any layout</SelectItem>
-              {facets.moduleCounts.map((modules) => (
-                <SelectItem key={modules} value={String(modules)}>
-                  {modules} module{modules === 1 ? "" : "s"}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {definition.facets.moduleCount ? (
+            <Select
+              value={filters.moduleCount || ALL}
+              onValueChange={(value) => setParam("modules", value)}
+            >
+              <SelectTrigger aria-label="Filter by module configuration">
+                <SelectValue placeholder="Modules" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>Any layout</SelectItem>
+                {facets.moduleCounts.map((modules) => (
+                  <SelectItem key={modules} value={String(modules)}>
+                    {modules} module{modules === 1 ? "" : "s"}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
 
           <Select
             value={filters.availability}

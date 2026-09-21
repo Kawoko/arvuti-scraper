@@ -29,7 +29,13 @@ function StatCard({ label, value, hint, icon }: StatCardProps) {
   );
 }
 
-export function SummaryCards({ stats }: { stats: DashboardStats }) {
+interface SummaryCardsProps {
+  stats: DashboardStats;
+  /** Short description of what is tracked, e.g. "DDR5 UDIMM 5600 / 6000 MHz". */
+  hint: string;
+}
+
+export function SummaryCards({ stats, hint }: SummaryCardsProps) {
   const lastScan = stats.lastSuccessfulScan;
 
   return (
@@ -37,7 +43,7 @@ export function SummaryCards({ stats }: { stats: DashboardStats }) {
       <StatCard
         label="Products tracked"
         value={formatInteger(stats.productsTracked)}
-        hint="DDR5 UDIMM 5600 / 6000 MHz"
+        hint={hint}
         icon={<Package />}
       />
       <StatCard

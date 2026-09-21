@@ -51,6 +51,8 @@ export interface ArvutitarkAttributeGroup {
 
 export interface ArvutitarkProduct {
   id: ArvutitarkId;
+  /** Catalogue category the retailer assigns, e.g. 20 = RAM, 18 = graphics cards. */
+  primary_category_id?: number | string | null;
   name?: ArvutitarkLocalized | null;
   price?: number | string | null;
   original_price?: number | string | null;
@@ -89,7 +91,7 @@ export interface AttributeEntry {
   text: string;
 }
 
-/** Normalized RAM specification values. `null` means "could not be determined". */
+/** RAM specification values. `null` means "could not be determined". */
 export interface RamSpecs {
   memoryType: string | null;
   capacityGb: number | null;
@@ -99,6 +101,19 @@ export interface RamSpecs {
   capacityPerModuleGb: number | null;
   formFactor: string | null;
   voltage: number | null;
+}
+
+/**
+ * Normalized specification values for any category.
+ *
+ * One flat shape serves every category. For RAM, `capacityGb` is the kit
+ * capacity and `memoryType` is e.g. "DDR5". For a graphics card, `capacityGb` is
+ * the VRAM size and `memoryType` is e.g. "GDDR7". Fields that do not apply to a
+ * category stay `null`; a value is never invented just to fill a column.
+ */
+export interface ProductSpecs extends RamSpecs {
+  /** Graphics card model, e.g. "NVIDIA GeForce RTX™ 5070". Null for RAM. */
+  chipset: string | null;
 }
 
 export const EMPTY_RAM_SPECS: RamSpecs = {
@@ -112,7 +127,9 @@ export const EMPTY_RAM_SPECS: RamSpecs = {
   voltage: null,
 };
 
-export type ComponentCategory = "ram";
+export const EMPTY_PRODUCT_SPECS: ProductSpecs = { ...EMPTY_RAM_SPECS, chipset: null };
+
+export type ComponentCategory = "ram" | "gpu";
 export type Retailer = "arvutitark";
 
 export interface NormalizedProduct {
@@ -125,7 +142,7 @@ export interface NormalizedProduct {
   nameEn: string | null;
   brand: string | null;
   url: string | null;
-  specs: RamSpecs;
+  specs: ProductSpecs;
   price: number;
   originalPrice: number | null;
   sourcePriceUpdatedAt: string | null;
@@ -146,6 +163,7 @@ export interface SnapshotRow {
   brand: string | null;
   url: string | null;
   category: ComponentCategory;
+  chipset: string | null;
   memory_type: string | null;
   capacity_gb: number | null;
   speed_mhz: number | null;

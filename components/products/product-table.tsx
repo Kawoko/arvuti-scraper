@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { productDetailHref } from "@/lib/categories";
 import { buildSortHref, type ProductFilters, type SortColumn, type SortDirection } from "@/lib/filters";
 import { EMPTY_VALUE, formatCurrency, formatDayMonth } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
@@ -125,7 +126,7 @@ export function ProductTable({ rows, filters, pathname = "/" }: ProductTableProp
                       <span className="text-xs text-muted-foreground">{row.brand}</span>
                     ) : null}
                     <Link
-                      href={`/ram/${row.product_id}`}
+                      href={productDetailHref(row.category, row.product_id)}
                       className="max-w-[22rem] truncate text-sm font-medium underline-offset-4 hover:underline"
                     >
                       {row.name}

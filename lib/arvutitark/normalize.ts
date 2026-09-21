@@ -1,10 +1,18 @@
 import { isRecord, toFiniteNumber, toIntegerOrNull } from "@/lib/utils";
-import { ARVUTITARK_ATTRIBUTE_IDS, ARVUTITARK_PRODUCT_BASE_URL } from "./config";
+import {
+  ARVUTITARK_ATTRIBUTE_IDS,
+  ARVUTITARK_CATEGORY_BY_ID,
+  ARVUTITARK_GPU_ATTRIBUTE_IDS,
+  ARVUTITARK_GPU_CHIPSETS,
+  ARVUTITARK_GPU_VRAM_GB,
+  ARVUTITARK_PRODUCT_BASE_URL,
+} from "./config";
 import type {
   ArvutitarkProduct,
   AttributeEntry,
+  ComponentCategory,
   NormalizedProduct,
-  RamSpecs,
+  ProductSpecs,
   SnapshotRow,
 } from "./types";
 
@@ -334,7 +342,7 @@ export function parseVoltage(text: string | null | undefined): number | null {
  * Spec assembly
  * ========================================================================== */
 
-export function extractRamSpecs(product: ArvutitarkProduct): RamSpecs {
+export function extractRamSpecs(product: ArvutitarkProduct): ProductSpecs {
   const entries = extractAttributeEntries(product);
   const attribute = (id: number) => getAttributeText(entries, id);
 
@@ -388,7 +396,115 @@ export function extractRamSpecs(product: ArvutitarkProduct): RamSpecs {
     capacityPerModuleGb,
     formFactor,
     voltage,
+    chipset: null,
   };
+}
+
+/* ==========================================================================
+ * Graphics card specification parsing
+ * ========================================================================== */
+
+/**
+ * Canonical chipset key for comparison: trademark and registered symbols removed,
+ * whitespace collapsed, upper-cased. This makes matching tolerant of the small
+ * differences between the filter values and the values the API returns.
+ */
+export function normalizeChipsetKey(text: string): string {
+  return text
+    .replace(/[\u2122\u00AE]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+const GPU_CHIPSET_KEYS: ReadonlyArray<string> = ARVUTITARK_GPU_CHIPSETS.map(normalizeChipsetKey);
+
+/**
+ * Resolve a tracked chipset from free text.
+ *
+ * Only ever returns a value from the tracked allow-list, and prefers the longest
+ * match so "RTX 5070 Ti" is never truncated to "RTX 5070".
+ */
+export function matchGpuChipset(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const haystack = normalizeChipsetKey(text);
+
+  let best: string | null = null;
+  let bestLength = 0;
+
+  for (const chipset of ARVUTITARK_GPU_CHIPSETS) {
+    const key = normalizeChipsetKey(chipset);
+    if (key.length > bestLength && haystack.includes(key)) {
+      best = chipset;
+      bestLength = key.length;
+    }
+  }
+
+  return best;
+}
+
+/** True when the value names one of the tracked chipsets. */
+export function isTrackedGpuChipset(text: string | null | undefined): boolean {
+  if (!text) return false;
+  return GPU_CHIPSET_KEYS.includes(normalizeChipsetKey(text));
+}
+
+/** `"GDDR6"`, `"GDDR6X"`, `"GDDR7"`. */
+export function parseGpuMemoryType(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const match = text.match(/\bGDDR\s?([3-9])\s?(X)?\b/i);
+  if (!match) return null;
+  return `GDDR${match[1]}${match[2] ? "X" : ""}`.toUpperCase();
+}
+
+/**
+ * Extract specs for a graphics card.
+ *
+ * `capacityGb` holds the VRAM size and `memoryType` the memory technology, so
+ * the shared `ProductSpecs` shape is reused instead of duplicated.
+ */
+export function extractGpuSpecs(product: ArvutitarkProduct): ProductSpecs {
+  const entries = extractAttributeEntries(product);
+  const attribute = (id: number) => getAttributeText(entries, id);
+
+  const { name, nameEn } = resolveProductName(product.name);
+  const nameText = [nameEn, name].filter((value): value is string => Boolean(value)).join(" ");
+  const combined = `${nameText} ${entries.map((entry) => entry.text).join(" ")}`.trim();
+
+  const memorySizeRaw = attribute(ARVUTITARK_GPU_ATTRIBUTE_IDS.memorySize);
+  const chipsetRaw = attribute(ARVUTITARK_GPU_ATTRIBUTE_IDS.chipset);
+
+  const capacityGb =
+    parseBareNumber(memorySizeRaw, 1, 256) ??
+    parseCapacityGb(memorySizeRaw) ??
+    parseCapacityGb(nameText);
+
+  const memoryType = parseGpuMemoryType(combined);
+
+  // Keep the retailer's own chipset value verbatim when it is present, so the
+  // criteria check can reject an off-list model. Fall back to matching a known
+  // chipset name in the title, which can only ever yield an allow-listed value.
+  const chipset = normalizeOptionalText(chipsetRaw) ?? matchGpuChipset(nameText);
+
+  return {
+    memoryType,
+    capacityGb,
+    speedMhz: null,
+    casLatency: null,
+    moduleCount: null,
+    capacityPerModuleGb: null,
+    formFactor: null,
+    voltage: null,
+    chipset,
+  };
+}
+
+/** Extract specs using the extractor for the given category. */
+export function extractSpecs(
+  product: ArvutitarkProduct,
+  category: ComponentCategory,
+): ProductSpecs {
+  return category === "gpu" ? extractGpuSpecs(product) : extractRamSpecs(product);
 }
 
 /* ==========================================================================
@@ -453,9 +569,29 @@ export function normalizeIsoTimestamp(value: unknown): string | null {
 }
 
 /** Convert a raw API product into a validated, typed product. Returns null when unusable. */
-export function normalizeProduct(raw: ArvutitarkProduct): NormalizedProduct | null {
+/**
+ * The retailer's own catalogue category for a product.
+ *
+ * When it disagrees with the category we asked for, the product is dropped
+ * rather than misfiled. This is a hard guard, unlike the deliberately soft
+ * specification criteria.
+ */
+function declaredCategoryOf(raw: ArvutitarkProduct): ComponentCategory | null {
+  const id = toFiniteNumber(raw.primary_category_id);
+  if (id === null) return null;
+  return ARVUTITARK_CATEGORY_BY_ID[Math.trunc(id)] ?? null;
+}
+
+export function normalizeProduct(
+  raw: ArvutitarkProduct,
+  category: ComponentCategory = "ram",
+): NormalizedProduct | null {
   const id = coerceProductId(raw.id);
   if (id === null) return null;
+
+  // Reject a product the retailer files under a different category.
+  const declaredCategory = declaredCategoryOf(raw);
+  if (declaredCategory !== null && declaredCategory !== category) return null;
 
   const { name, nameEn } = resolveProductName(raw.name);
   if (!name) return null;
@@ -468,7 +604,7 @@ export function normalizeProduct(raw: ArvutitarkProduct): NormalizedProduct | nu
   return {
     id,
     retailer: "arvutitark",
-    category: "ram",
+    category,
     sku: normalizeOptionalText(raw.sku),
     ean: normalizeOptionalText(raw.ean),
     name,
@@ -478,7 +614,7 @@ export function normalizeProduct(raw: ArvutitarkProduct): NormalizedProduct | nu
       localizedName(raw.brand, "en") ??
       localizedName(raw.brand, "et"),
     url: buildProductUrl(raw.path),
-    specs: extractRamSpecs(raw),
+    specs: extractSpecs(raw, category),
     price,
     originalPrice: toFiniteNumber(raw.original_price),
     sourcePriceUpdatedAt: normalizeIsoTimestamp(raw.price_updated_at),
@@ -499,6 +635,32 @@ export function matchesRamCriteria(product: NormalizedProduct): boolean {
   if (speedMhz !== null && speedMhz !== 5600 && speedMhz !== 6000) return false;
   if (formFactor !== null && formFactor !== "UDIMM") return false;
   return true;
+}
+
+/**
+ * Graphics card criteria.
+ *
+ * The VRAM and chipset limits are already applied by the API filter; these
+ * checks are a local safety net so an off-list model is dropped rather than
+ * silently stored if the remote filter ever fails to apply.
+ */
+export function matchesGpuCriteria(product: NormalizedProduct): boolean {
+  const { capacityGb, memoryType, chipset } = product.specs;
+
+  if (capacityGb !== null && capacityGb !== ARVUTITARK_GPU_VRAM_GB) return false;
+  if (memoryType !== null && !memoryType.startsWith("GDDR")) return false;
+
+  // Only rejects when the retailer gave us an explicit, unrecognised chipset.
+  if (chipset !== null && !isTrackedGpuChipset(chipset) && matchGpuChipset(chipset) === null) {
+    return false;
+  }
+
+  return true;
+}
+
+/** Apply the criteria for the product's own category. */
+export function matchesCategoryCriteria(product: NormalizedProduct): boolean {
+  return product.category === "gpu" ? matchesGpuCriteria(product) : matchesRamCriteria(product);
 }
 
 /** Deduplicate raw products by Arvutitark product id, keeping the first seen. */
@@ -524,6 +686,7 @@ export function toSnapshotRow(product: NormalizedProduct): SnapshotRow {
     brand: product.brand,
     url: product.url,
     category: product.category,
+    chipset: product.specs.chipset,
     memory_type: product.specs.memoryType,
     capacity_gb: product.specs.capacityGb,
     speed_mhz: product.specs.speedMhz,
@@ -541,8 +704,16 @@ export function toSnapshotRow(product: NormalizedProduct): SnapshotRow {
   };
 }
 
-/** Human-readable one-line spec summary, e.g. `32GB · 2×16GB · DDR5-6000 · CL30`. */
-export function formatSpecSummary(specs: RamSpecs): string {
+/** Human-readable one-line spec summary. */
+export function formatSpecSummary(specs: ProductSpecs): string {
+  // Graphics cards read best as chipset first, then VRAM and memory technology.
+  if (specs.chipset !== null) {
+    const cardParts = [specs.chipset];
+    if (specs.capacityGb !== null) cardParts.push(`${specs.capacityGb}GB`);
+    if (specs.memoryType !== null) cardParts.push(specs.memoryType);
+    return cardParts.join(" · ");
+  }
+
   const parts: string[] = [];
   if (specs.capacityGb !== null) parts.push(`${specs.capacityGb}GB`);
   if (specs.moduleCount !== null && specs.capacityPerModuleGb !== null) {

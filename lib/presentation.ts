@@ -1,11 +1,12 @@
 import { formatSpecSummary } from "@/lib/arvutitark/normalize";
-import type { RamSpecs } from "@/lib/arvutitark/types";
+import type { ProductSpecs } from "@/lib/arvutitark/types";
 import { directionFromChange, type PriceDirection } from "@/lib/price";
 import type { ProductPriceSummaryRow } from "@/types/database";
 
-/** Rebuild a `RamSpecs` object from a summary row so shared formatters can be reused. */
-export function ramSpecsFromRow(row: ProductPriceSummaryRow): RamSpecs {
+/** Rebuild a `ProductSpecs` object from a summary row so shared formatters can be reused. */
+export function productSpecsFromRow(row: ProductPriceSummaryRow): ProductSpecs {
   return {
+    chipset: row.chipset,
     memoryType: row.memory_type,
     capacityGb: row.capacity_gb,
     speedMhz: row.speed_mhz,
@@ -17,9 +18,9 @@ export function ramSpecsFromRow(row: ProductPriceSummaryRow): RamSpecs {
   };
 }
 
-/** e.g. `32GB · 2×16GB · DDR5-6000 · CL30 · UDIMM` */
+/** e.g. `32GB · 2×16GB · DDR5-6000 · CL30 · UDIMM` or `NVIDIA GeForce RTX™ 5070 · 16GB · GDDR7` */
 export function specSummaryFromRow(row: ProductPriceSummaryRow): string {
-  return formatSpecSummary(ramSpecsFromRow(row));
+  return formatSpecSummary(productSpecsFromRow(row));
 }
 
 /**

@@ -76,6 +76,8 @@ create table if not exists public.products (
   id                      bigint primary key,
   retailer                text not null default 'arvutitark',
   category                text not null default 'ram',
+  -- Graphics card model, e.g. 'NVIDIA GeForce RTX™ 5070'. Null for RAM.
+  chipset                 text,
   sku                     text,
   ean                     text,
   name                    text not null,
@@ -101,6 +103,7 @@ create table if not exists public.products (
 alter table public.products add column if not exists id bigint;
 alter table public.products add column if not exists retailer text not null default 'arvutitark';
 alter table public.products add column if not exists category text not null default 'ram';
+alter table public.products add column if not exists chipset text;
 alter table public.products add column if not exists sku text;
 alter table public.products add column if not exists ean text;
 alter table public.products add column if not exists name text;
@@ -168,6 +171,7 @@ create index if not exists products_ean_idx on public.products (ean);
 create index if not exists products_capacity_idx on public.products (capacity_gb);
 create index if not exists products_speed_idx on public.products (speed_mhz);
 create index if not exists products_cas_idx on public.products (cas_latency);
+create index if not exists products_chipset_idx on public.products (chipset);
 
 -- ---------------------------------------------------------------------------
 -- price_history

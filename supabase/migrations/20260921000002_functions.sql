@@ -104,6 +104,7 @@ begin
       brand                  text,
       url                    text,
       category               text,
+      chipset                text,
       memory_type            text,
       capacity_gb            integer,
       speed_mhz              integer,
@@ -130,7 +131,7 @@ begin
   -- the incoming value is missing (coalesce), so a partially-parsed day never
   -- wipes previously known specifications.
   insert into public.products as p (
-    id, retailer, category, sku, ean, name, name_en, brand, url,
+    id, retailer, category, chipset, sku, ean, name, name_en, brand, url,
     memory_type, capacity_gb, speed_mhz, cas_latency, module_count,
     capacity_per_module_gb, form_factor, voltage,
     first_seen_at, last_seen_at
@@ -139,6 +140,7 @@ begin
     i.id,
     'arvutitark',
     coalesce(nullif(i.category, ''), 'ram'),
+    i.chipset,
     i.sku,
     i.ean,
     i.name,
@@ -164,6 +166,7 @@ begin
     brand                  = coalesce(excluded.brand, p.brand),
     url                    = coalesce(excluded.url, p.url),
     category               = coalesce(excluded.category, p.category),
+    chipset                = coalesce(excluded.chipset, p.chipset),
     memory_type            = coalesce(excluded.memory_type, p.memory_type),
     capacity_gb            = coalesce(excluded.capacity_gb, p.capacity_gb),
     speed_mhz              = coalesce(excluded.speed_mhz, p.speed_mhz),

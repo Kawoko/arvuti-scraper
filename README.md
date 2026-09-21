@@ -1,9 +1,10 @@
 # Arvutitark Price Tracker
 
 Historical price tracking for PC components at the Estonian retailer
-[Arvutitark](https://arvutitark.ee). The first release tracks **desktop DDR5 RAM**
-(UDIMM, 5600 / 6000 MHz); the schema and scraper are built so CPUs, GPUs, SSDs,
-motherboards and PSUs can be added later without restructuring anything.
+[Arvutitark](https://arvutitark.ee). It currently tracks **desktop DDR5 RAM**
+(UDIMM, 5600 / 6000 MHz) and **16 GB current-generation graphics cards**
+(RTX 50 series, Radeon RX 9000, Intel Arc). CPUs, SSDs, motherboards and PSUs can
+be added the same way without restructuring anything.
 
 The point of the project is a genuine **price history**. Arvutitark's own
 `original_price` field is not a history — it is whatever the shop currently
@@ -25,6 +26,32 @@ never overwrites those rows, so "is this actually cheap?" becomes answerable.
 | `/status` | Collection health: last attempt, last success, recent runs and failures |
 
 ---
+
+## Tracked categories
+
+Both categories are collected in a **single daily scrape**, under one daily
+claim. Adding a category costs one entry in [`lib/categories.ts`](lib/categories.ts:1),
+a spec extractor in `lib/arvutitark/normalize.ts` and a route file.
+
+| Category | Route | Arvutitark category | Attribute filter | Tracked set |
+| --- | --- | --- | --- | --- |
+| RAM | `/` | `20` | `28[5600﹑6000];178[DDR5];181[UDIMM]` | Desktop DDR5 UDIMM, 5600 & 6000 MHz |
+| GPUs | `/gpu` | `18` | `15[16];110[…chipsets…]` | 16 GB RTX 5050–5090, RX 7000/9060 XT/9070/9070 XT, Intel Arc |
+
+The GPU chipset filter is a whitelist built from
+[`ARVUTITARK_GPU_CHIPSETS`](lib/arvutitark/config.ts:95). Products are additionally
+checked locally, so a card the retailer files outside the whitelist is dropped
+rather than stored.
+
+**Multi-value separator.** Both filters separate multiple values with **U+FE50
+SMALL COMMA**, not an ASCII comma — see the debugging section below.
+
+**Chipset value encoding.** Arvutitark's own URLs percent-encode spaces (`%20`)
+and trademark symbols (`%E2%84%A2`), and the browser then encodes the `%` again.
+That double encoding is reproduced deliberately in
+[`encodeAttributeValue()`](lib/arvutitark/config.ts:70), because a filter containing
+spaces or `™` only matches when it is byte-identical. Verify it with
+`npm run scrape:url` before trusting the result.
 
 ## Stack
 
@@ -52,8 +79,10 @@ app plus one scheduled Node script.
 app/
   layout.tsx                 Root layout, theme provider
   page.tsx                   RAM price list (main page)
+  gpu/page.tsx               GPU price list
   ram/page.tsx               Alias -> /
-  ram/[id]/page.tsx          Product detail + history chart
+  ram/[id]/page.tsx          RAM product detail + history chart
+  gpu/[id]/page.tsx          GPU product detail + history chart
   deals/page.tsx             Deals, URL-driven tabs
   status/page.tsx            Collection status
   error.tsx / not-found.tsx  Error and empty boundaries
@@ -70,10 +99,12 @@ components/
 lib/
   arvutitark/
     client.ts                Typed API client, pagination, defensive parsing
-    config.ts                Attribute ids, filters, env-backed settings
-    normalize.ts             RAM spec parsing + product normalization
+    config.ts                Attribute ids, per-category filters, env settings
+    normalize.ts             Spec parsing + product normalization per category
     types.ts                 Raw + normalized types
     validation.ts            Zod schema for the ingest payload
+  categories.ts              Category registry driving scraper, queries and UI
+  product-page.ts            Shared product-detail loaders and metadata
   queries/                   Read layer for the summary view and scrape runs
   scraper/run.ts             Scrape orchestration + daily-claim guarantee
   supabase/admin.ts          Privileged client (server-side only)
@@ -129,6 +160,7 @@ npm run scrape:url   # print the exact API request without contacting Arvutitark
 | `ARVUTITARK_PAGE_DELAY_MS` | server | Politeness delay between pages, default `750` |
 | `ARVUTITARK_MAX_PAGES` | server | Safety ceiling, default `50` |
 | `SCRAPER_DEBUG` | server | `true` for verbose request/response logging. Never logs secrets |
+| `ARVUTITARK_GPU_ATTRIBUTES` | server | Overrides the graphics card filter. Set to `15[16]` to drop the chipset whitelist if it ever stops matching |
 
 `.env.local` is gitignored. `.env.example` contains placeholders only.
 
@@ -161,6 +193,11 @@ supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
+> **Adding a category to an existing install.** The migrations are additive and
+> idempotent, so re-run `20260921000001_init.sql` (adds `products.chipset`) and
+> `20260921000003_views.sql` (exposes it on the summary view). `0002` is
+> re-runnable too and carries the updated `ingest_snapshot`.
+
 ### What the migrations create
 
 **`scrape_runs`** — one row per Tallinn calendar day, primary key on `scrape_date`.
@@ -169,8 +206,8 @@ This table is both the atomic daily lock and the persistent fetch log. Columns:
 `failed`), `product_count`, `page_count`, `error_message`.
 
 **`products`** — current metadata keyed by the Arvutitark numeric product id:
-`id`, `retailer`, `category`, `sku`, `ean`, `name`, `name_en`, `brand`, `url`,
-`first_seen_at`, `last_seen_at`, plus normalized RAM fields `memory_type`,
+`id`, `retailer`, `category`, `chipset`, `sku`, `ean`, `name`, `name_en`, `brand`,
+`url`, `first_seen_at`, `last_seen_at`, plus normalized fields `memory_type`,
 `capacity_gb`, `speed_mhz`, `cas_latency`, `module_count`,
 `capacity_per_module_gb`, `form_factor`, `voltage`. Nullable by design — a value
 is left `null` rather than guessed.
@@ -356,6 +393,12 @@ never recorded as a successful collection.
    wrong.
 5. Confirm `Accept: application/json` and `X-Arv-Country: est` are still accepted
    — they are the only headers sent.
+6. If only the GPU category fails, the chipset whitelist is the likely culprit
+   (it is the one filter containing spaces and `™`). Compare the printed URL
+   against the browser's request character for character, and if it still does
+   not match, drop the whitelist with `ARVUTITARK_GPU_ATTRIBUTES=15[16]` to track
+   all 16 GB cards. Chipset filtering then falls back to the local allow-list
+   check, so off-list models are still rejected before storage.
 
 ### Clearing today's claim for development testing
 
@@ -601,19 +644,27 @@ group by 1, 2 having count(*) > 1;
 
 ---
 
-## Adding the next component category
+## Adding another component category
 
-The design deliberately keeps this cheap:
+Graphics cards were added this way, so the path is proven. It takes four small
+changes:
 
-1. Add a migration clause (or a new migration) widening the `category` check and
-   adding any category-specific columns.
-2. Add a `lib/arvutitark/<category>.ts` parser alongside `normalize.ts`; the
-   attribute-extraction primitives there are category-agnostic.
-3. Add the API filter set to `lib/arvutitark/config.ts` and parameterise
-   `fetchAllProducts`.
-4. Add a route group (e.g. `app/gpu/`) reusing `ProductList`, `FilterToolbar`,
-   `Pagination` and `PriceHistoryChart` unchanged.
+1. **Config** — add the category id and attribute filter to
+   [`lib/arvutitark/config.ts`](lib/arvutitark/config.ts:1), and register the
+   category id in `ARVUTITARK_CATEGORY_BY_ID`.
+2. **Normalizer** — add an `extract<Category>Specs` function and a criteria check
+   in [`lib/arvutitark/normalize.ts`](lib/arvutitark/normalize.ts:1), then extend
+   `extractSpecs` and `matchesCategoryCriteria`. Reuse the shared `ProductSpecs`
+   shape rather than adding a parallel type.
+3. **Registry** — add one entry to
+   [`lib/categories.ts`](lib/categories.ts:1) with its label, routes and which
+   spec filters apply. The scraper loop, the query layer and the UI all read from
+   this.
+4. **Route** — add `app/<category>/page.tsx` and `app/<category>/[id]/page.tsx`,
+   both a few lines, delegating to `CategoryListing` and `ProductDetailView`.
 
-`products.retailer` and `products.category` already exist so additional retailers
-and categories need no restructuring. Comparison across retailers is intentionally
-*not* implemented yet — `sku` and `ean` are stored so it can be added later.
+Schema work is only needed if the category has a field the shared columns cannot
+express — that is why GPUs needed one new column (`products.chipset`) and nothing
+else. `products.retailer` and `products.category` already exist so a second
+retailer needs no restructuring. Cross-retailer comparison is intentionally *not*
+built yet; `sku` and `ean` are stored so it can be added later.

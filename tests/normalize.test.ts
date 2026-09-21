@@ -262,6 +262,7 @@ describe("extractRamSpecs", () => {
       capacityPerModuleGb: 16,
       formFactor: "UDIMM",
       voltage: 1.35,
+      chipset: null,
     });
   });
 
@@ -275,6 +276,7 @@ describe("extractRamSpecs", () => {
       capacityPerModuleGb: null,
       formFactor: "UDIMM",
       voltage: null,
+      chipset: null,
     });
   });
 
@@ -289,6 +291,7 @@ describe("extractRamSpecs", () => {
       capacityPerModuleGb: null,
       formFactor: null,
       voltage: null,
+      chipset: null,
     });
   });
 

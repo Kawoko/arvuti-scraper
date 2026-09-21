@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return buildProductMetadata(await getProductDetailCached(productId));
 }
 
-export default async function RamProductPage({ params }: ProductPageProps) {
+export default async function GpuProductPage({ params }: ProductPageProps) {
   const { id } = await params;
   const productId = parseProductId(id);
   if (productId === null) notFound();
@@ -27,5 +27,5 @@ export default async function RamProductPage({ params }: ProductPageProps) {
   const detail = await getProductDetailCached(productId);
   if (!detail) notFound();
 
-  return <ProductDetailView detail={detail} definition={CATEGORY_DEFINITIONS.ram} />;
+  return <ProductDetailView detail={detail} definition={CATEGORY_DEFINITIONS.gpu} />;
 }

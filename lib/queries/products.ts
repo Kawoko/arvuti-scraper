@@ -1,5 +1,6 @@
 import { PAGE_SIZE, minDiscountValue, toNumberOrNull, type ProductFilters } from "@/lib/filters";
 import { getSupabaseReadClient } from "@/lib/supabase/server";
+import type { ComponentCategory } from "@/lib/arvutitark/types";
 import type { ProductPriceSummaryRow } from "@/types/database";
 import { DataAccessError } from "./errors";
 
@@ -13,6 +14,7 @@ const LIST_COLUMNS = [
   "name_en",
   "brand",
   "url",
+  "chipset",
   "memory_type",
   "capacity_gb",
   "speed_mhz",
@@ -50,13 +52,16 @@ function sanitizeSearchTerm(value: string): string {
     .trim();
 }
 
-export async function getProductList(filters: ProductFilters): Promise<ProductListResult> {
+export async function getProductList(
+  filters: ProductFilters,
+  category: ComponentCategory = "ram",
+): Promise<ProductListResult> {
   const supabase = getSupabaseReadClient();
 
   let query = supabase
     .from("product_price_summary")
     .select(LIST_COLUMNS, { count: "exact" })
-    .eq("category", "ram");
+    .eq("category", category);
 
   const term = sanitizeSearchTerm(filters.q);
   if (term) {
@@ -170,13 +175,15 @@ function distinctSorted<T extends string | number>(values: Array<T | null>): T[]
  * distinct values are computed in memory rather than requiring extra SQL
  * objects.
  */
-export async function getFilterFacets(): Promise<FilterFacets> {
+export async function getFilterFacets(
+  category: ComponentCategory = "ram",
+): Promise<FilterFacets> {
   const supabase = getSupabaseReadClient();
 
   const { data, error } = await supabase
     .from("product_price_summary")
-    .select("brand,capacity_gb,speed_mhz,cas_latency,module_count")
-    .eq("category", "ram");
+    .select("brand,capacity_gb,speed_mhz,cas_latency,module_count,chipset")
+    .eq("category", category);
 
   if (error) {
     throw new DataAccessError("Failed to load filter options", error.message);

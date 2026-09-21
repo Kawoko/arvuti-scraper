@@ -2,9 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import {
   ARVUTITARK_ATTRIBUTE_IDS,
+  ARVUTITARK_GPU_ATTRIBUTES,
+  ARVUTITARK_GPU_CATEGORY_ID,
+  ARVUTITARK_GPU_CHIPSETS,
+  ARVUTITARK_GPU_VRAM_GB,
   ARVUTITARK_MULTI_VALUE_SEPARATOR,
   ARVUTITARK_RAM_ATTRIBUTES,
   buildAttributeFilter,
+  encodeAttributeValue,
   readBooleanEnv,
 } from "@/lib/arvutitark/config";
 
@@ -38,6 +43,46 @@ describe("ARVUTITARK_RAM_ATTRIBUTES", () => {
   it("excludes shop availability so out-of-stock products are still tracked", () => {
     expect(ARVUTITARK_RAM_ATTRIBUTES).not.toContain("shops");
     expect(ARVUTITARK_RAM_ATTRIBUTES).not.toContain("in_stock");
+  });
+});
+
+describe("graphics card filter", () => {
+  it("targets category 18 and the 16 GB VRAM filter", () => {
+    expect(ARVUTITARK_GPU_CATEGORY_ID).toBe(18);
+    expect(ARVUTITARK_GPU_VRAM_GB).toBe(16);
+    expect(ARVUTITARK_GPU_ATTRIBUTES.startsWith("15[16];110[")).toBe(true);
+  });
+
+  it("lists every tracked chipset", () => {
+    expect(ARVUTITARK_GPU_CHIPSETS).toHaveLength(12);
+    expect(ARVUTITARK_GPU_CHIPSETS).toContain("Intel\u00AE Arc\u2122");
+    expect(ARVUTITARK_GPU_CHIPSETS).toContain("NVIDIA GeForce RTX\u2122 5090");
+    expect(ARVUTITARK_GPU_CHIPSETS).toContain("AMD Radeon\u2122 RX 9070 XT");
+  });
+
+  it("separates the chipset values with U+FE50, not an ASCII comma", () => {
+    expect(ARVUTITARK_GPU_ATTRIBUTES).toContain("\uFE50");
+    expect(ARVUTITARK_GPU_ATTRIBUTES).not.toContain(",");
+  });
+
+  it("pre-encodes spaces and trademark symbols the way the retailer does", () => {
+    // The retailer's own URLs carry %20 and %E2%84%A2, and the browser then
+    // encodes the % again. Reproducing that is what makes the filter match.
+    expect(ARVUTITARK_GPU_ATTRIBUTES).toContain("AMD%20Radeon%E2%84%A2%20RX%209070");
+    expect(ARVUTITARK_GPU_ATTRIBUTES).toContain("Intel%C2%AE%20Arc%E2%84%A2");
+    expect(ARVUTITARK_GPU_ATTRIBUTES).not.toContain(" ");
+  });
+});
+
+describe("encodeAttributeValue", () => {
+  it("encodes spaces, and trademark and registered signs", () => {
+    expect(encodeAttributeValue("ab cd")).toBe("ab%20cd");
+    expect(encodeAttributeValue("RTX\u2122 5070")).toBe("RTX%E2%84%A2%205070");
+    expect(encodeAttributeValue("Intel\u00AE")).toBe("Intel%C2%AE");
+  });
+
+  it("escapes a literal percent so it is not double-decoded", () => {
+    expect(encodeAttributeValue("100%")).toBe("100%25");
   });
 });
 

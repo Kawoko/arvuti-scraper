@@ -12,8 +12,9 @@ loadEnv();
 
 import { fetchAllProducts } from "@/lib/arvutitark/client";
 import { getScraperConfig } from "@/lib/arvutitark/config";
+import { CATEGORY_LIST } from "@/lib/categories";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import { consoleScrapeLogger, runScrape, type ScrapeRpcClient } from "@/lib/scraper/run";
+import { consoleScrapeLogger, runScrape, type ScrapeRpcClient, type ScrapeTarget } from "@/lib/scraper/run";
 
 function createRpcClient(): ScrapeRpcClient {
   const supabase = getSupabaseAdmin();
@@ -59,9 +60,23 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Every category shares the single daily claim, so this stays one
+  // "attempt per day" even as categories are added.
+  const targets: ScrapeTarget[] = CATEGORY_LIST.map((definition) => ({
+    category: definition.category,
+    categoryId: definition.arvutitarkCategoryId,
+    // Built-in filter, with a documented env override for graphics cards.
+    attributes: definition.category === "gpu" ? config.gpuAttributes : definition.attributes,
+  }));
+
+  consoleScrapeLogger.info(
+    `Tracking ${targets.length} category(ies): ${targets.map((t) => t.category).join(", ")}`,
+  );
+
   const result = await runScrape({
     rpc,
-    fetchProducts: () =>
+    targets,
+    fetchProducts: (target) =>
       fetchAllProducts({
         baseUrl: config.baseUrl,
         timeoutMs: config.requestTimeoutMs,
@@ -69,6 +84,8 @@ async function main(): Promise<void> {
         maxPages: config.maxPages,
         debug: config.debug,
         onDebug: (message) => consoleScrapeLogger.info(message),
+        category: target.categoryId,
+        attributes: target.attributes,
         onPage: ({ page, lastPage, count }) => {
           if (count === -1) {
             consoleScrapeLogger.info(

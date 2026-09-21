@@ -1,3 +1,4 @@
+import type { ComponentCategory } from "@/lib/arvutitark/types";
 import { getTallinnDate, daysBetween } from "@/lib/dates";
 import { getSupabaseReadClient } from "@/lib/supabase/server";
 import type { ScrapeRunRow } from "@/types/database";
@@ -22,10 +23,15 @@ function countResult(
   return result.count ?? 0;
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+export async function getDashboardStats(
+  category: ComponentCategory = "ram",
+): Promise<DashboardStats> {
   const supabase = getSupabaseReadClient();
   const base = () =>
-    supabase.from("product_price_summary").select("product_id", { count: "exact", head: true }).eq("category", "ram");
+    supabase
+      .from("product_price_summary")
+      .select("product_id", { count: "exact", head: true })
+      .eq("category", category);
 
   const [tracked, drops, belowStart, newLows, lastSuccessfulScan] = await Promise.all([
     base(),

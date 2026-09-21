@@ -148,6 +148,10 @@ export interface FetchOptions {
 export interface FetchAllOptions extends FetchOptions {
   pageDelayMs?: number;
   maxPages?: number;
+  /** Arvutitark category id to request. Defaults to the RAM category. */
+  category?: number;
+  /** Attribute filter to request. Defaults to the RAM filter. */
+  attributes?: string;
   onPage?: (info: { page: number; lastPage: number; count: number }) => void;
 }
 
@@ -269,7 +273,10 @@ export async function fetchAllProducts(options: FetchAllOptions = {}): Promise<F
   let pageCount = 0;
 
   for (;;) {
-    const result = await fetchProductPage({ page }, options);
+    const result = await fetchProductPage(
+      { page, category: options.category, attributes: options.attributes },
+      options,
+    );
     const count = result.products.length;
     pageCount = page;
     collected.push(...result.products);

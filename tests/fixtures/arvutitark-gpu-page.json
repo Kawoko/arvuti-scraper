@@ -1,0 +1,97 @@
+{
+  "current_page": 1,
+  "last_page": 1,
+  "per_page": 200,
+  "total": 4,
+  "data": [
+    {
+      "id": 1527001,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "PNY GeForce RTX™ 5070 16GB GDDR7 Graphics Card" },
+      "primary_category_id": 18,
+      "price": 699.9,
+      "original_price": 749.9,
+      "price_wo_vat": 564.44,
+      "price_updated_at": "2026-09-21T08:10:00.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/graafikakaardid-vga/pny-rtx-5070-16gb",
+        "en": "/en/pc-components/graphics-cards/pny-rtx-5070-16gb"
+      },
+      "main_attributes": [
+        { "id": 15, "name": { "en": "Memory" }, "values": { "en": ["16 GB"] } },
+        { "id": 110, "name": { "en": "Chipset" }, "values": { "en": ["NVIDIA GeForce RTX™ 5070"] } }
+      ],
+      "technical_details": [
+        {
+          "name": { "en": "Technical Details" },
+          "attributes": [
+            { "id": 15, "name": { "en": "Memory" }, "values": { "en": ["16 GB"] } },
+            { "id": 110, "name": { "en": "Chipset" }, "values": { "en": ["NVIDIA GeForce RTX™ 5070"] } }
+          ]
+        }
+      ],
+      "brand_name": "PNY",
+      "stock": { "warehouse": 8, "in_stock": 0, "shops": { "4": 1 } },
+      "sku": "PNY-RTX5070-16G",
+      "ean": "4713008452001"
+    },
+    {
+      "id": 1527002,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "Gigabyte GeForce RTX™ 5070 Ti 16GB GDDR7 OC" },
+      "primary_category_id": 18,
+      "price": 949.9,
+      "original_price": 949.9,
+      "price_updated_at": "2026-09-21T08:12:00.000000Z",
+      "path": { "et": "/arvutikomponendid/graafikakaardid-vga/gigabyte-rtx-5070-ti-16gb" },
+      "main_attributes": [
+        { "id": 15, "name": { "en": "Memory" }, "values": { "en": ["16 GB"] } },
+        { "id": 110, "name": { "en": "Chipset" }, "values": { "en": ["NVIDIA GeForce RTX™ 5070 Ti"] } }
+      ],
+      "brand_name": "Gigabyte",
+      "stock": { "warehouse": 3, "in_stock": 0, "shops": {} },
+      "sku": "GV-RTX5070TI-16G",
+      "ean": "4719331312002"
+    },
+    {
+      "id": 1527003,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "Sapphire Radeon™ RX 9070 XT 16GB GDDR6 Pulse" },
+      "primary_category_id": 18,
+      "price": 779.9,
+      "original_price": 819.9,
+      "price_updated_at": "2026-09-21T08:14:00.000000Z",
+      "path": { "et": "/arvutikomponendid/graafikakaardid-vga/sapphire-rx-9070-xt-16gb" },
+      "main_attributes": [
+        { "id": 15, "name": { "en": "Memory" }, "values": { "en": ["16 GB"] } },
+        { "id": 110, "name": { "en": "Chipset" }, "values": { "en": ["AMD Radeon™ RX 9070 XT"] } }
+      ],
+      "brand_name": "Sapphire",
+      "stock": { "warehouse": 0, "in_stock": 0, "shops": { "7": 2 } },
+      "sku": "11348-03-20G",
+      "ean": "4719331312003"
+    },
+    {
+      "id": 1527004,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "ASUS GeForce RTX™ 4060 Ti 16GB GDDR6 Dual" },
+      "primary_category_id": 18,
+      "price": 519.9,
+      "original_price": 519.9,
+      "price_updated_at": "2026-09-21T08:16:00.000000Z",
+      "path": { "et": "/arvutikomponendid/graafikakaardid-vga/asus-rtx-4060-ti-16gb" },
+      "main_attributes": [
+        { "id": 15, "name": { "en": "Memory" }, "values": { "en": ["16 GB"] } },
+        { "id": 110, "name": { "en": "Chipset" }, "values": { "en": ["NVIDIA GeForce RTX™ 4060 Ti"] } }
+      ],
+      "brand_name": "ASUS",
+      "stock": { "warehouse": 5, "in_stock": 0, "shops": {} },
+      "sku": "DUAL-RTX4060TI-16G",
+      "ean": "4711081922004"
+    }
+  ]
+}

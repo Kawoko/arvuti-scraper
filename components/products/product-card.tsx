@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
+import { productDetailHref } from "@/lib/categories";
 import { EMPTY_VALUE, formatCurrency, formatDayMonth } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
 import type { ProductPriceSummaryRow } from "@/types/database";
@@ -13,7 +14,7 @@ export function ProductCard({ row }: { row: ProductPriceSummaryRow }) {
 
   return (
     <Link
-      href={`/ram/${row.product_id}`}
+      href={productDetailHref(row.category, row.product_id)}
       className="surface surface-interactive block p-4 focus-visible:ring-2 focus-visible:ring-ring/40"
     >
       <div className="flex items-start justify-between gap-3">

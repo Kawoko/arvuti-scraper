@@ -71,6 +71,7 @@ select
   p.id                                   as product_id,
   p.retailer,
   p.category,
+  p.chipset,
   p.sku,
   p.ean,
   p.name,

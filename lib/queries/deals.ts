@@ -1,3 +1,4 @@
+import type { ComponentCategory } from "@/lib/arvutitark/types";
 import { getSupabaseReadClient } from "@/lib/supabase/server";
 import type { ProductPriceSummaryRow } from "@/types/database";
 import { DataAccessError } from "./errors";
@@ -17,6 +18,7 @@ const DEAL_COLUMNS = [
   "name_en",
   "brand",
   "url",
+  "chipset",
   "memory_type",
   "capacity_gb",
   "speed_mhz",
@@ -44,10 +46,21 @@ export function isDealsTab(value: string | null | undefined): value is DealsTab 
   return value === "biggest_drops" || value === "new_lows" || value === "below_start" || value === "in_stock";
 }
 
-export async function getDeals(tab: DealsTab, limit = 24): Promise<ProductPriceSummaryRow[]> {
+/**
+ * Deals across every tracked category by default, so the page answers "what is
+ * cheap right now" rather than only "what RAM is cheap". Pass a category to
+ * narrow it.
+ */
+export async function getDeals(
+  tab: DealsTab,
+  category?: ComponentCategory,
+  limit = 24,
+): Promise<ProductPriceSummaryRow[]> {
   const supabase = getSupabaseReadClient();
 
-  let query = supabase.from("product_price_summary").select(DEAL_COLUMNS).eq("category", "ram");
+  let query = supabase.from("product_price_summary").select(DEAL_COLUMNS);
+
+  if (category) query = query.eq("category", category);
 
   switch (tab) {
     case "new_lows":
@@ -91,10 +104,16 @@ function countResult(
   return result.count ?? 0;
 }
 
-export async function getDealsTabCounts(): Promise<Record<DealsTab, number>> {
+export async function getDealsTabCounts(
+  category?: ComponentCategory,
+): Promise<Record<DealsTab, number>> {
   const supabase = getSupabaseReadClient();
-  const base = () =>
-    supabase.from("product_price_summary").select("product_id", { count: "exact", head: true }).eq("category", "ram");
+  const base = () => {
+    const query = supabase
+      .from("product_price_summary")
+      .select("product_id", { count: "exact", head: true });
+    return category ? query.eq("category", category) : query;
+  };
 
   const [drops, newLows, belowStart, inStock] = await Promise.all([
     base().lt("price_change_percent", 0),

@@ -1,7 +1,14 @@
 import { getTallinnDate } from "@/lib/dates";
-import { matchesRamCriteria, normalizeProduct, toSnapshotRow } from "@/lib/arvutitark/normalize";
+import { matchesCategoryCriteria, normalizeProduct, toSnapshotRow } from "@/lib/arvutitark/normalize";
 import { snapshotRowSchema } from "@/lib/arvutitark/validation";
-import type { ArvutitarkProduct, SnapshotRow } from "@/lib/arvutitark/types";
+import type { ArvutitarkProduct, ComponentCategory, SnapshotRow } from "@/lib/arvutitark/types";
+
+/** One category to collect, with the Arvutitark filter that selects it. */
+export interface ScrapeTarget {
+  category: ComponentCategory;
+  categoryId: number;
+  attributes: string;
+}
 
 /**
  * Orchestration for a single scrape attempt.
@@ -59,8 +66,10 @@ export interface FetchedProducts {
 
 export interface ScrapeRunDeps {
   rpc: ScrapeRpcClient;
+  /** Categories to collect, in order. Each is fetched once per scrape. */
+  targets: ScrapeTarget[];
   /** Only ever invoked AFTER the daily slot has been successfully claimed. */
-  fetchProducts: () => Promise<FetchedProducts>;
+  fetchProducts: (target: ScrapeTarget) => Promise<FetchedProducts>;
   now?: () => Date;
   logger?: ScrapeLogger;
 }
@@ -106,6 +115,7 @@ export interface SnapshotBuildResult {
 
 export function buildSnapshotRows(
   products: ArvutitarkProduct[],
+  category: ComponentCategory,
   logger: ScrapeLogger = consoleScrapeLogger,
 ): SnapshotBuildResult {
   const rows: SnapshotRow[] = [];
@@ -113,12 +123,12 @@ export function buildSnapshotRows(
   let skippedAsInvalid = 0;
 
   for (const raw of products) {
-    const product = normalizeProduct(raw);
+    const product = normalizeProduct(raw, category);
     if (!product) {
       skippedAsInvalid += 1;
       continue;
     }
-    if (!matchesRamCriteria(product)) {
+    if (!matchesCategoryCriteria(product)) {
       skippedByCriteria += 1;
       continue;
     }
@@ -193,43 +203,55 @@ export async function runScrape(deps: ScrapeRunDeps): Promise<ScrapeRunResult> {
   logger.info("Daily slot claimed. Contacting Arvutitark.");
 
   // ---------------------------------------------------------------------
-  // 2. Fetch, normalize, validate and ingest.
+  // 2. For each category: fetch, normalize, validate and ingest.
+  //
+  //    Every category shares the single daily claim taken above, so adding a
+  //    category does not add an extra daily fetch opportunity.
   // ---------------------------------------------------------------------
   let pageCount = 0;
+  let productCount = 0;
 
   try {
-    const fetched = await deps.fetchProducts();
-    pageCount = fetched.pageCount;
-    logger.info(`Fetched ${fetched.products.length} unique products across ${pageCount} page(s).`);
+    for (const target of deps.targets) {
+      logger.info(
+        `--- ${target.category.toUpperCase()} (Arvutitark category ${target.categoryId}) ---`,
+      );
 
-    const built = buildSnapshotRows(fetched.products, logger);
+      const fetched = await deps.fetchProducts(target);
+      pageCount += fetched.pageCount;
+      logger.info(
+        `Fetched ${fetched.products.length} unique products across ${fetched.pageCount} page(s).`,
+      );
 
-    // Phase-by-phase accounting. This is what turns a bare "zero products"
-    // failure into something immediately diagnosable.
-    logger.info(`Raw products: ${built.rawCount}`);
-    logger.info(`Normalized/usable: ${built.normalizedCount}`);
-    logger.info(`Outside criteria: ${built.skippedByCriteria}`);
-    logger.info(`Invalid: ${built.skippedAsInvalid}`);
-    logger.info(`Snapshot rows: ${built.rows.length}`);
+      const built = buildSnapshotRows(fetched.products, target.category, logger);
 
-    // Safety check retained: an empty snapshot must fail the run rather than be
-    // recorded as a successful collection.
-    if (built.rows.length === 0) {
-      throw new Error(describeEmptyResult(built));
+      // Phase-by-phase accounting. This is what turns a bare "zero products"
+      // failure into something immediately diagnosable.
+      logger.info(`Raw products: ${built.rawCount}`);
+      logger.info(`Normalized/usable: ${built.normalizedCount}`);
+      logger.info(`Outside criteria: ${built.skippedByCriteria}`);
+      logger.info(`Invalid: ${built.skippedAsInvalid}`);
+      logger.info(`Snapshot rows: ${built.rows.length}`);
+
+      // Safety check retained: an empty snapshot must fail the run rather than
+      // be recorded as a successful collection.
+      if (built.rows.length === 0) {
+        throw new Error(`[${target.category}] ${describeEmptyResult(built)}`);
+      }
+
+      const { data: ingestResult, error: ingestError } = await deps.rpc.ingest({
+        p_scrape_date: scrapeDate,
+        p_products: built.rows,
+      });
+      if (ingestError) throw new Error(`[${target.category}] ${ingestError.message}`);
+
+      const ingested = ingestResult?.product_count ?? built.rows.length;
+      productCount += ingested;
+
+      logger.info(
+        `Ingested ${ingested} product(s); ${ingestResult?.price_count ?? 0} price observation(s) recorded.`,
+      );
     }
-
-    const rows = built.rows;
-
-    const { data: ingestResult, error: ingestError } = await deps.rpc.ingest({
-      p_scrape_date: scrapeDate,
-      p_products: rows,
-    });
-    if (ingestError) throw new Error(ingestError.message);
-
-    const productCount = ingestResult?.product_count ?? rows.length;
-    logger.info(
-      `Ingested ${productCount} product(s); ${ingestResult?.price_count ?? 0} price observation(s) recorded.`,
-    );
 
     const { error: finishError } = await deps.rpc.finish({
       p_scrape_date: scrapeDate,

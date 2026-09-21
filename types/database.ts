@@ -33,6 +33,7 @@ export type ProductRow = {
   url: string | null;
   first_seen_at: string;
   last_seen_at: string;
+  chipset: string | null;
   memory_type: string | null;
   capacity_gb: number | null;
   speed_mhz: number | null;
@@ -66,6 +67,7 @@ export type ProductPriceSummaryRow = {
   name_en: string | null;
   brand: string | null;
   url: string | null;
+  chipset: string | null;
   memory_type: string | null;
   capacity_gb: number | null;
   speed_mhz: number | null;
