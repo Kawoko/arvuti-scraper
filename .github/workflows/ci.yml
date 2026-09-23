@@ -24,8 +24,13 @@ jobs:
           node-version: "20"
           cache: npm
 
+      # `npm ci` validates every dependency edge in the lockfile, and this
+      # lockfile cannot be made complete from Windows: npm there never descends
+      # into the platform-gated `@tailwindcss/oxide-wasm32-wasi` subtree, so
+      # `ci` rejects it on Linux. `npm install` reconciles the same lock without
+      # that strict validation. Every dependency is still pinned by the lock.
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Lint
         run: npm run lint

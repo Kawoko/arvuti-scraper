@@ -3,22 +3,19 @@ import type { ComponentCategory } from "./types";
 /**
  * Static configuration for the Arvutitark scraper.
  *
- * Attribute ids come from the retailer's own filter UI.
+ * Attribute ids were read off the retailer's own filter UI and confirmed against
+ * the live API.
  *
- * RAM (category 20):
- *   27  = Capacity
- *   28  = Speed
- *   178 = Memory type
- *   179 = CAS latency / CL
- *   180 = Module count / layout
- *   181 = Form factor
- *   182 = Voltage
- *
- * Graphics cards (category 18):
- *   15  = Memory size (VRAM)
- *   110 = Chipset / model
+ * RAM (category 20): 27 capacity, 28 speed, 178 memory type, 179 CL,
+ *                   180 module layout, 181 form factor, 182 voltage
+ * Graphics (cat 18): 15 VRAM, 17 memory type, 110 chipset
+ * CPU (cat 15):      18 model, 19 family, 102 socket, 21 cores, 103 threads,
+ *                   100 base clock, 20 turbo clock
+ * Storage:           23 SSD capacity, 25 HDD capacity, 113 form factor,
+ *                   164 interface, 185 read speed, 186 write speed
  */
 export const ARVUTITARK_ATTRIBUTE_IDS = {
+  // RAM
   capacity: 27,
   speed: 28,
   memoryType: 178,
@@ -26,29 +23,51 @@ export const ARVUTITARK_ATTRIBUTE_IDS = {
   moduleCount: 180,
   formFactor: 181,
   voltage: 182,
+
+  // Storage (HDD and SSD)
+  ssdCapacity: 23,
+  hddCapacity: 25,
+  formFactorStorage: 113,
+  interfaceType: 164,
+  readSpeed: 185,
+  writeSpeed: 186,
+
+  // CPU
+  cpuModel: 18,
+  cpuFamily: 19,
+  cpuSocket: 102,
+  cpuCores: 21,
+  cpuThreads: 103,
+  cpuBaseClock: 100,
+  cpuTurboClock: 20,
 } as const;
 
 export const ARVUTITARK_GPU_ATTRIBUTE_IDS = {
   memorySize: 15,
+  memoryType: 17,
   chipset: 110,
 } as const;
-
-/** Category id 20 = "Mälud (RAM)" in the Arvutitark catalogue. */
-export const ARVUTITARK_RAM_CATEGORY_ID = 20;
-
-/** Category id 18 = "Graafikakaardid (VGA)" in the Arvutitark catalogue. */
-export const ARVUTITARK_GPU_CATEGORY_ID = 18;
 
 /**
  * Maps an Arvutitark category id to our own category.
  *
  * Used to verify that a response actually belongs to the category we asked for:
- * a product the retailer files elsewhere is dropped rather than misfiled.
+ * a product the retailer files elsewhere is dropped rather than misfiled. Also
+ * used to label custom-tracked items, which have no category of their own.
  */
 export const ARVUTITARK_CATEGORY_BY_ID: Record<number, ComponentCategory> = {
-  [ARVUTITARK_RAM_CATEGORY_ID]: "ram",
-  [ARVUTITARK_GPU_CATEGORY_ID]: "gpu",
+  15: "cpu",
+  18: "gpu",
+  20: "ram",
+  137: "hdd",
+  139: "ssd",
 };
+
+export const ARVUTITARK_RAM_CATEGORY_ID = 20;
+export const ARVUTITARK_GPU_CATEGORY_ID = 18;
+export const ARVUTITARK_CPU_CATEGORY_ID = 15;
+export const ARVUTITARK_HDD_CATEGORY_ID = 137;
+export const ARVUTITARK_SSD_CATEGORY_ID = 139;
 
 /**
  * Separator between multiple values inside a single attribute filter.
@@ -69,6 +88,21 @@ export function buildAttributeFilter(
 }
 
 /**
+ * Builds a range filter such as `25[1000﹑-﹑5000]`.
+ *
+ * The bounds are passed through verbatim: the retailer's ranges are not always
+ * in the same unit as the parsed product value, so they are preserved exactly
+ * rather than reinterpreted.
+ */
+export function buildAttributeRangeFilter(
+  attributeId: number,
+  min: string,
+  max: string,
+): string {
+  return buildAttributeFilter(attributeId, [min, "-", max]);
+}
+
+/**
  * Pre-encode an attribute value the way Arvutitark's own URLs do.
  *
  * The retailer's filter links contain `%20` for spaces and `%E2%84%A2` for the
@@ -86,11 +120,11 @@ export function encodeAttributeValue(value: string): string {
     .replace(/\u00AE/g, "%C2%AE");
 }
 
-/**
- * Tracked graphics card chipsets, exactly as Arvutitark names them.
- *
- * Escapes are used for the trademark (U+2122) and registered (U+00AE) signs.
- */
+/* ==========================================================================
+ * Filter definitions
+ * ========================================================================== */
+
+/** Tracked graphics card chipsets, exactly as Arvutitark names them. */
 export const ARVUTITARK_GPU_CHIPSETS: ReadonlyArray<string> = [
   "AMD Radeon\u2122 RX 7000",
   "AMD Radeon\u2122 RX 9060 XT",
@@ -109,6 +143,34 @@ export const ARVUTITARK_GPU_CHIPSETS: ReadonlyArray<string> = [
 /** VRAM size we track. 16 GB keeps the tracked set small and comparable. */
 export const ARVUTITARK_GPU_VRAM_GB = 16;
 
+/** Tracked CPU families. */
+export const ARVUTITARK_CPU_FAMILIES: ReadonlyArray<string> = [
+  "AMD Ryzen\u2122 5",
+  "AMD Ryzen\u2122 7",
+  "AMD Ryzen\u2122 9",
+  "Intel\u00AE Core\u2122 Ultra 7",
+  "Intel\u00AE Core\u2122 Ultra 9",
+  "Intel\u00AE Core\u2122 Ultra 5",
+];
+
+/** Tracked CPU sockets. */
+export const ARVUTITARK_CPU_SOCKETS: ReadonlyArray<string> = ["AM5", "LGA 1851"];
+
+/** Brands filter for CPUs. This parameter uses an ASCII comma, unlike attributes. */
+export const ARVUTITARK_CPU_BRANDS = "intel,amd";
+
+/** HDD capacity range, in gigabytes, exactly as the retailer's filter shows it. */
+export const ARVUTITARK_HDD_CAPACITY_RANGE = { min: "1000", max: "5000" } as const;
+
+/** SSD capacity range, in gigabytes, exactly as the retailer's filter shows it. */
+export const ARVUTITARK_SSD_CAPACITY_RANGE = { min: "864", max: "31458" } as const;
+
+/** SSD read-speed range in MB/s. */
+export const ARVUTITARK_SSD_READ_RANGE = { min: "3500", max: "14900" } as const;
+
+/** SSD write-speed range in MB/s. */
+export const ARVUTITARK_SSD_WRITE_RANGE = { min: "3500", max: "14000" } as const;
+
 /**
  * The RAM filter string we send to the API. Availability (`shops=...`) is
  * deliberately NOT included: we want historical coverage of every tracked
@@ -120,12 +182,48 @@ export const ARVUTITARK_RAM_ATTRIBUTES = [
   buildAttributeFilter(ARVUTITARK_ATTRIBUTE_IDS.formFactor, ["UDIMM"]),
 ].join(";");
 
-/** The graphics card filter string, using the same conventions as the RAM one. */
 export const ARVUTITARK_GPU_ATTRIBUTES = [
-  buildAttributeFilter(ARVUTITARK_GPU_ATTRIBUTE_IDS.memorySize, [String(ARVUTITARK_GPU_VRAM_GB)]),
+  buildAttributeFilter(ARVUTITARK_GPU_ATTRIBUTE_IDS.memorySize, [
+    String(ARVUTITARK_GPU_VRAM_GB),
+  ]),
   buildAttributeFilter(
     ARVUTITARK_GPU_ATTRIBUTE_IDS.chipset,
     ARVUTITARK_GPU_CHIPSETS.map(encodeAttributeValue),
+  ),
+].join(";");
+
+export const ARVUTITARK_CPU_ATTRIBUTES = [
+  buildAttributeFilter(
+    ARVUTITARK_ATTRIBUTE_IDS.cpuFamily,
+    ARVUTITARK_CPU_FAMILIES.map(encodeAttributeValue),
+  ),
+  buildAttributeFilter(
+    ARVUTITARK_ATTRIBUTE_IDS.cpuSocket,
+    ARVUTITARK_CPU_SOCKETS.map(encodeAttributeValue),
+  ),
+].join(";");
+
+export const ARVUTITARK_HDD_ATTRIBUTES = buildAttributeRangeFilter(
+  ARVUTITARK_ATTRIBUTE_IDS.hddCapacity,
+  ARVUTITARK_HDD_CAPACITY_RANGE.min,
+  ARVUTITARK_HDD_CAPACITY_RANGE.max,
+);
+
+export const ARVUTITARK_SSD_ATTRIBUTES = [
+  buildAttributeRangeFilter(
+    ARVUTITARK_ATTRIBUTE_IDS.ssdCapacity,
+    ARVUTITARK_SSD_CAPACITY_RANGE.min,
+    ARVUTITARK_SSD_CAPACITY_RANGE.max,
+  ),
+  buildAttributeRangeFilter(
+    ARVUTITARK_ATTRIBUTE_IDS.readSpeed,
+    ARVUTITARK_SSD_READ_RANGE.min,
+    ARVUTITARK_SSD_READ_RANGE.max,
+  ),
+  buildAttributeRangeFilter(
+    ARVUTITARK_ATTRIBUTE_IDS.writeSpeed,
+    ARVUTITARK_SSD_WRITE_RANGE.min,
+    ARVUTITARK_SSD_WRITE_RANGE.max,
   ),
 ].join(";");
 
@@ -143,6 +241,10 @@ export const ARVUTITARK_DEFAULT_MAX_PAGES = 50;
 /** Company sends this to select the Estonian storefront. */
 export const ARVUTITARK_COUNTRY_HEADER = "X-Arv-Country";
 export const ARVUTITARK_COUNTRY_VALUE = "est";
+
+/* ==========================================================================
+ * Runtime configuration
+ * ========================================================================== */
 
 /**
  * Environment bag.
@@ -188,6 +290,21 @@ export function readBooleanEnv(
   return ["1", "true", "yes", "on"].includes(raw.trim().toLowerCase());
 }
 
+/**
+ * Comma-separated allow-list of groups to collect.
+ *
+ * Lets a single group be exercised on its own without editing code, e.g.
+ * `SCRAPER_GROUPS=cpu` or `SCRAPER_GROUPS=ram,gpu,custom`.
+ */
+export function readListEnv(key: string, fallback: string[], env: EnvRecord = process.env): string[] {
+  const raw = env[key];
+  if (!raw || raw.trim() === "") return fallback;
+  return raw
+    .split(",")
+    .map((value) => value.trim())
+    .filter((value) => value !== "");
+}
+
 export interface ScraperRuntimeConfig {
   baseUrl: string;
   requestTimeoutMs: number;
@@ -195,6 +312,8 @@ export interface ScraperRuntimeConfig {
   maxPages: number;
   /** Verbose request/response logging. Enabled with `SCRAPER_DEBUG=true`. */
   debug: boolean;
+  /** Groups to collect; defaults to every registered category plus custom items. */
+  groups: string[];
   /**
    * Attribute filter override for graphics cards. Set `ARVUTITARK_GPU_ATTRIBUTES`
    * to `15[16]` to drop the chipset filter if it ever stops matching.
@@ -213,6 +332,7 @@ export function getScraperConfig(env: EnvRecord = process.env): ScraperRuntimeCo
     pageDelayMs: readNumericEnv("ARVUTITARK_PAGE_DELAY_MS", ARVUTITARK_DEFAULT_PAGE_DELAY_MS, env),
     maxPages: readNumericEnv("ARVUTITARK_MAX_PAGES", ARVUTITARK_DEFAULT_MAX_PAGES, env),
     debug: readBooleanEnv("SCRAPER_DEBUG", false, env),
+    groups: readListEnv("SCRAPER_GROUPS", ["ram", "gpu", "cpu", "hdd", "ssd", "custom"], env),
     gpuAttributes: readEnv("ARVUTITARK_GPU_ATTRIBUTES", ARVUTITARK_GPU_ATTRIBUTES, env),
   };
 }

@@ -263,6 +263,11 @@ describe("extractRamSpecs", () => {
       formFactor: "UDIMM",
       voltage: 1.35,
       chipset: null,
+      family: null,
+      socket: null,
+      readSpeedMbs: null,
+      writeSpeedMbs: null,
+      interfaceType: null,
     });
   });
 
@@ -277,6 +282,11 @@ describe("extractRamSpecs", () => {
       formFactor: "UDIMM",
       voltage: null,
       chipset: null,
+      family: null,
+      socket: null,
+      readSpeedMbs: null,
+      writeSpeedMbs: null,
+      interfaceType: null,
     });
   });
 
@@ -292,6 +302,11 @@ describe("extractRamSpecs", () => {
       formFactor: null,
       voltage: null,
       chipset: null,
+      family: null,
+      socket: null,
+      readSpeedMbs: null,
+      writeSpeedMbs: null,
+      interfaceType: null,
     });
   });
 

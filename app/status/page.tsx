@@ -70,7 +70,12 @@ function RunRowItem({ run }: { run: ScrapeRunRow }) {
 
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-4 py-3 text-sm">
-      <span className="w-28 shrink-0 font-medium tabular">{formatDate(run.scrape_date)}</span>
+      <span className="w-40 shrink-0 font-medium tabular">
+        {formatDate(run.scrape_date)}
+        <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+          slot {run.slot}
+        </span>
+      </span>
       <ScrapeStatusBadge status={run.status} />
       <span className={run.status === "failed" ? "text-negative" : "text-muted-foreground"}>
         {detail}

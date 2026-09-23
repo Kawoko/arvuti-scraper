@@ -1,10 +1,15 @@
 # Arvutitark Price Tracker
 
 Historical price tracking for PC components at the Estonian retailer
-[Arvutitark](https://arvutitark.ee). It currently tracks **desktop DDR5 RAM**
-(UDIMM, 5600 / 6000 MHz) and **16 GB current-generation graphics cards**
-(RTX 50 series, Radeon RX 9000, Intel Arc). CPUs, SSDs, motherboards and PSUs can
-be added the same way without restructuring anything.
+[Arvutitark](https://arvutitark.ee). It tracks six **independent groups**:
+desktop DDR5 RAM, 16 GB current-generation graphics cards, current-generation
+CPUs, 1–5 TB hard drives, 3500+ MB/s SSDs, and a set of individually pinned
+products.
+
+Each group has its own filters, its own stored rows and its own reporting, so
+enabling or refreshing one can never overwrite another. Collection runs **twice a
+day**. Motherboards and PSUs can be added the same way without restructuring
+anything.
 
 The point of the project is a genuine **price history**. Arvutitark's own
 `original_price` field is not a history — it is whatever the shop currently
@@ -29,14 +34,44 @@ never overwrites those rows, so "is this actually cheap?" becomes answerable.
 
 ## Tracked categories
 
-Both categories are collected in a **single daily scrape**, under one daily
-claim. Adding a category costs one entry in [`lib/categories.ts`](lib/categories.ts:1),
-a spec extractor in `lib/arvutitark/normalize.ts` and a route file.
+Every group is collected within whichever daily slot is claimed. Adding a group
+costs one entry in [`lib/categories.ts`](lib/categories.ts:1) and a spec
+extractor in `lib/arvutitark/normalize.ts` — and nothing else, because the routes
+and navigation are generated from that registry.
 
 | Category | Route | Arvutitark category | Attribute filter | Tracked set |
 | --- | --- | --- | --- | --- |
 | RAM | `/` | `20` | `28[5600﹑6000];178[DDR5];181[UDIMM]` | Desktop DDR5 UDIMM, 5600 & 6000 MHz |
 | GPUs | `/gpu` | `18` | `15[16];110[…chipsets…]` | 16 GB RTX 5050–5090, RX 7000/9060 XT/9070/9070 XT, Intel Arc |
+| CPUs | `/cpu` | `15` | `19[…families…];102[…sockets…]` + `brands=intel,amd` | Ryzen 5/7/9 (AM5) and Core Ultra 5/7/9 (LGA 1851) |
+| HDDs | `/hdd` | `137` | `25[1000﹑-﹑5000]` | 1–5 TB mechanical drives |
+| SSDs | `/ssd` | `139` | `23[864﹑-﹑31458];185[3500﹑-﹑14900];186[3500﹑-﹑14000]` | 3500+ MB/s read and write |
+| Custom | `/custom` | *(none)* | *(none — pinned by product id)* | 3 individually pinned products |
+
+### Custom pinned items
+
+The `custom` group tracks specific products by id rather than by a filter, so a
+pinned product stays tracked even if it falls outside a category's filters (a GPU
+dropped from the chipset whitelist, a drive outside the speed band). The pinned
+ids live in [`lib/custom-items.ts`](lib/custom-items.ts:1):
+
+| Product id | Item |
+| --- | --- |
+| `1436318` | ASRock Radeon RX 9070 Challenger 16GB |
+| `1183913` | G.Skill Ripjaws S5 32GB DDR5-6000 CL30 |
+| `1392056` | Lexar NQ790 2TB NVMe SSD |
+
+All three are fetched in **one** request using the endpoint's comma-separated
+`ids` parameter (verified against the live API), with the category and attribute
+filters deliberately omitted — sending them would exclude the very products being
+pinned.
+
+**Independent storage.** Products and price history are keyed by
+`(product id, category)`, not by product id alone. A product pinned as a custom
+item therefore gets its own row and its own price history, and cannot overwrite
+the same product tracked under `gpu` — or vice versa. The pinned ASRock RX 9070
+above is deliberately an example of exactly this: it also matches the GPU
+filter, so it legitimately exists in both groups with separate histories.
 
 The GPU chipset filter is a whitelist built from
 [`ARVUTITARK_GPU_CHIPSETS`](lib/arvutitark/config.ts:95). Products are additionally
@@ -78,11 +113,10 @@ app plus one scheduled Node script.
 ```
 app/
   layout.tsx                 Root layout, theme provider
-  page.tsx                   RAM price list (main page)
-  gpu/page.tsx               GPU price list
+  page.tsx                   RAM price list (main page, at /)
   ram/page.tsx               Alias -> /
-  ram/[id]/page.tsx          RAM product detail + history chart
-  gpu/[id]/page.tsx          GPU product detail + history chart
+  [category]/page.tsx        Listing for /gpu, /cpu, /hdd, /ssd, /custom
+  [category]/[id]/page.tsx   Product detail + history chart, any group
   deals/page.tsx             Deals, URL-driven tabs
   status/page.tsx            Collection status
   error.tsx / not-found.tsx  Error and empty boundaries
@@ -103,7 +137,8 @@ lib/
     normalize.ts             Spec parsing + product normalization per category
     types.ts                 Raw + normalized types
     validation.ts            Zod schema for the ingest payload
-  categories.ts              Category registry driving scraper, queries and UI
+  categories.ts              Group registry driving scraper, queries, routes and UI
+  custom-items.ts            The individually pinned products for the custom group
   product-page.ts            Shared product-detail loaders and metadata
   queries/                   Read layer for the summary view and scrape runs
   scraper/run.ts             Scrape orchestration + daily-claim guarantee
@@ -161,6 +196,7 @@ npm run scrape:url   # print the exact API request without contacting Arvutitark
 | `ARVUTITARK_MAX_PAGES` | server | Safety ceiling, default `50` |
 | `SCRAPER_DEBUG` | server | `true` for verbose request/response logging. Never logs secrets |
 | `ARVUTITARK_GPU_ATTRIBUTES` | server | Overrides the graphics card filter. Set to `15[16]` to drop the chipset whitelist if it ever stops matching |
+| `SCRAPER_GROUPS` | server | Comma-separated groups to collect. Defaults to all six. Useful for exercising one group in isolation, e.g. `SCRAPER_GROUPS=cpu` |
 
 `.env.local` is gitignored. `.env.example` contains placeholders only.
 
@@ -193,10 +229,12 @@ supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
-> **Adding a category to an existing install.** The migrations are additive and
-> idempotent, so re-run `20260921000001_init.sql` (adds `products.chipset`) and
-> `20260921000003_views.sql` (exposes it on the summary view). `0002` is
-> re-runnable too and carries the updated `ingest_snapshot`.
+> **Applying the group and twice-daily changes.** Run
+> `20260921000004_groups_and_slots.sql` (second daily slot, per-category spec
+> columns, and the composite `(id, category)` identity) and then
+> `20260921000005_grouped_summary_view.sql` (rebuilds the summary view on that
+> identity). `0005` **must run last**. Every migration is additive and safe to
+> re-run, and `0004` prints a notice if it cannot build a uniqueness guarantee.
 
 ### What the migrations create
 
@@ -400,78 +438,99 @@ never recorded as a successful collection.
    all 16 GB cards. Chipset filtering then falls back to the local allow-list
    check, so off-list models are still rejected before storage.
 
-### Clearing today's claim for development testing
+### Clearing a claim for development testing
 
-The scraper will not fetch twice in one Tallinn day, by design. If you explicitly
-want to re-run today after a fix, clear today's row by hand in the Supabase SQL
+The scraper will not fetch twice in one Tallinn slot, by design. If you
+explicitly want to re-run a slot after a fix, clear it by hand in the Supabase SQL
 editor. This is deliberately manual: nothing in the app or the scheduler ever
 deletes a claim.
 
 ```sql
 -- Inspect recent runs first.
-select scrape_date, status, product_count, error_message, attempted_at
+select scrape_date, slot, status, product_count, error_message, attempted_at
 from scrape_runs
-order by scrape_date desc
-limit 5;
+order by scrape_date desc, slot desc
+limit 10;
 
--- Clear ONLY today's (Europe/Tallinn) row so it can be claimed again.
+-- Clear ONLY today's (Europe/Tallinn) first slot so it can be claimed again.
+-- Drop `and slot = 1` to clear both slots.
 -- The `status <> 'completed'` guard refuses to delete a run that succeeded.
 delete from scrape_runs
-where scrape_date = '2026-09-21'
+where scrape_date = '2026-09-23'
+  and slot = 1
   and status <> 'completed';
 ```
 
 Notes:
 
 - Price observations for that day are protected by
-  `unique (product_id, observed_date)`. Re-running the same day refreshes product
-  metadata and inserts **zero** new observations, so history is never duplicated
-  or rewritten.
-- Do not automate this. The one-attempt-per-day guarantee depends on failed rows
-  staying in place.
+  `unique (product_id, category, observed_date)`. Re-running the same slot
+  refreshes product metadata and inserts **zero** new observations, so history is
+  never duplicated or rewritten.
+- Clearing slot 1 does not let slot 2 repeat: the `(scrape_date, slot)` primary
+  key still holds slot 2's own row.
+- Do not automate this. The twice-daily guarantee depends on failed rows staying
+  in place.
 
-## How the one-scrape-per-day mechanism works
+## How the twice-daily mechanism works
 
 This is the most important behaviour in the project. The scraper may be invoked
-as often as you like; it will contact Arvutitark **at most once per
-`Europe/Tallinn` calendar day**.
+as often as you like; it will contact Arvutitark **at most twice per
+`Europe/Tallinn` calendar day**, because shops do change prices more than once a
+day.
+
+Each day has two slots, and every group is collected within whichever slot is
+claimed:
+
+- **Slot 1** is available at any time from midnight Tallinn.
+- **Slot 2** needs two things: it must be noon or later in Tallinn, and at least
+  four hours must have passed since slot 1 was attempted. The gap stops a late
+  start from turning into two runs an hour apart, while still allowing a second
+  sample after downtime.
 
 ```
-claim today's scrape in Supabase      (INSERT ... ON CONFLICT DO NOTHING)
+claim the next available slot in Supabase
+        (INSERT ... ON CONFLICT (scrape_date, slot) DO NOTHING)
               ↓
-        claim succeeded?
-   no  →  STOP. Do not contact Arvutitark.        (exit 0 if already claimed)
+        slot claimed?
+   none →  STOP. Do not contact Arvutitark.       (exit 0)
    error → STOP. Do not contact Arvutitark.       (exit 1; database unreachable)
-   yes ↓
-        fetch Arvutitark (all pages, gently)
+   slot ↓
+        for each enabled group: fetch Arvutitark (all pages, gently)
               ↓
-        ingest the snapshot atomically
+        ingest each group's snapshot atomically
               ↓
-        mark the run completed
+        mark the run completed for that slot
 ```
 
 Properties this gives us:
 
 - **The claim is written first.** If the process crashes at any later point, the
-  row is already committed and the day stays claimed.
+  row is already committed and that slot stays claimed.
 - **Failures are recorded, not deleted.** A failed run is marked `failed` and is
-  never retried until the next calendar day. There is no delete path anywhere.
+  never retried for that slot. There is no delete path anywhere.
 - **Local memory is never the lock.** The guarantee lives entirely in a database
-  primary key, so it survives restarts, redeploys and multiple machines.
+  key on `(scrape_date, slot)`, so it survives restarts, redeploys and multiple
+  machines.
 - **Supabase unreachable ⇒ no retailer traffic.** The scraper aborts before
   making any external request.
-- **One row per day, not per product.** Duplicate observations are additionally
-  impossible thanks to `unique (product_id, observed_date)`.
+- **Adding a group does not add a fetch opportunity.** Every group shares the
+  same two daily slots.
+- **One observation per product, per group, per day.** Duplicate observations
+  are additionally impossible thanks to
+  `unique (product_id, category, observed_date)`.
 
-Worked example from the brief — a machine that was offline all morning:
+Worked example — a machine that was offline all morning:
 
 ```
 06:00  machine offline
 07:00  machine offline
 08:20  machine starts
-09:00  scheduled invocation → claims 2026-09-21 → performs the scrape
-10:00  scheduled invocation → 2026-09-21 already claimed → exits, no request
-11:00  scheduled invocation → exits, no request
+09:00  scheduled invocation → claims slot 1 → performs the first scrape
+10:00  scheduled invocation → no slot (slot 2 needs noon + a 4h gap)
+12:00  scheduled invocation → no slot (only 3h since slot 1)
+13:00  scheduled invocation → claims slot 2 → performs the second scrape
+14:00  scheduled invocation → both slots taken → exits, no request
 ```
 
 ---

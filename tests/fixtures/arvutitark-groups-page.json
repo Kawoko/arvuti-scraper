@@ -1,0 +1,198 @@
+{
+  "current_page": 1,
+  "last_page": 1,
+  "per_page": 200,
+  "total": 6,
+  "data": [
+    {
+      "id": 1375186,
+      "active": true,
+      "type": "PRODUCT",
+      "name": {
+        "en": "AMD AM5 Ryzen 5 8400F Tray 4,7GHz MAX 6xCore 12xThread 22MB 65W",
+        "et": "AMD AM5 Ryzen 5 8400F Tray 4,7GHz MAX 6xCore 12xThread 22MB 65W"
+      },
+      "primary_category_id": 15,
+      "slug": "amd-am5-ryzen-5-8400f-tray-47ghz-max-6xcore-12xthread-22mb-1375186",
+      "price": 99.9,
+      "original_price": 99.9,
+      "price_updated_at": "2026-09-23T10:07:38.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/protsessorid-cpu/amd-am5-ryzen-5-8400f-tray-47ghz-max-6xcore-12xthread-22mb-1375186",
+        "en": "/en/pc-components/processors-cpu/amd-am5-ryzen-5-8400f-tray-47ghz-max-6xcore-12xthread-22mb-1375186"
+      },
+      "main_attributes": [
+        { "id": 102, "name": { "en": "Socket" }, "values": { "en": ["AM5"] } },
+        { "id": 21, "name": { "en": "# of Cores" }, "values": { "en": ["6"] } },
+        { "id": 103, "name": { "en": "# of Threads" }, "values": { "en": ["12"] } }
+      ],
+      "technical_details": [
+        {
+          "name": { "en": "Technical Details" },
+          "attributes": [
+            { "id": 18, "name": { "en": "Model" }, "values": { "en": ["AMD Ryzen™ 5 8400F"] } },
+            { "id": 19, "name": { "en": "Processor Family" }, "values": { "en": ["AMD Ryzen™ 5"] } },
+            { "id": 102, "name": { "en": "Socket" }, "values": { "en": ["AM5"] } },
+            { "id": 100, "name": { "en": "Base clock" }, "values": { "en": ["4.2 GHz"] } },
+            { "id": 115, "name": { "en": "Wattage" }, "values": { "en": ["65 W"] } }
+          ]
+        }
+      ],
+      "brand_name": "AMD",
+      "stock": { "warehouse": 12, "in_stock": 0, "shops": { "4": 0 } },
+      "sku": "100-100001590BOX",
+      "ean": "4710000000015"
+    },
+    {
+      "id": 1210237,
+      "active": true,
+      "type": "PRODUCT",
+      "name": {
+        "en": "Seagate SkyHawk 1TB 3.5\" Surveillance HDD SATA III"
+      },
+      "primary_category_id": 137,
+      "price": 59.9,
+      "original_price": 59.9,
+      "price_updated_at": "2026-09-23T10:02:00.000000Z",
+      "path": { "et": "/arvutikomponendid/andmekandjad/kovakettad-hdd/seagate-skyhawk-1tb-1210237" },
+      "main_attributes": [
+        { "id": 25, "name": { "en": "Capacity" }, "values": { "en": ["1 TB"] } },
+        { "id": 164, "name": { "en": "Interface" }, "values": { "en": ["Serial ATA III"] } },
+        { "id": 113, "name": { "en": "Form Factor" }, "values": { "en": ["3.5\""] } }
+      ],
+      "technical_details": [
+        {
+          "name": { "en": "Technical Details" },
+          "attributes": [
+            { "id": 25, "name": { "en": "Capacity" }, "values": { "en": ["1 TB"] } },
+            { "id": 185, "name": { "en": "Read speed" }, "values": { "en": ["150 MB/s"] } },
+            { "id": 186, "name": { "en": "Write speed" }, "values": { "en": ["150 MB/s"] } },
+            { "id": 113, "name": { "en": "Form Factor" }, "values": { "en": ["3.5\""] } }
+          ]
+        }
+      ],
+      "brand_name": "Seagate",
+      "stock": { "warehouse": 4, "in_stock": 0, "shops": {} },
+      "sku": "ST1000VX013",
+      "ean": "8719706029376"
+    },
+    {
+      "id": 1420998,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "SanDisk WD Green SN3000 1TB M.2 2280 NVMe SSD" },
+      "primary_category_id": 139,
+      "price": 149.9,
+      "original_price": 149.9,
+      "price_updated_at": "2026-09-23T10:07:19.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/andmekandjad/pooljuhtkettad-ssd/wd-green-sn3000-nvme-ssd-1tb-m2-2280-1420998"
+      },
+      "main_attributes": [
+        { "id": 23, "name": { "en": "Capacity" }, "values": { "en": ["1 TB"] } },
+        { "id": 185, "name": { "en": "Read speed" }, "values": { "en": ["5000 MB/s"] } },
+        { "id": 186, "name": { "en": "Write speed" }, "values": { "en": ["4200 MB/s"] } }
+      ],
+      "technical_details": [
+        {
+          "name": { "en": "Technical Details" },
+          "attributes": [
+            { "id": 23, "name": { "en": "Capacity" }, "values": { "en": ["1 TB"] } },
+            { "id": 164, "name": { "en": "Interface" }, "values": { "en": ["PCIe 4.0"] } },
+            { "id": 113, "name": { "en": "Form Factor" }, "values": { "en": ["M.2 22x80mm"] } }
+          ]
+        }
+      ],
+      "brand_name": "SanDisk",
+      "stock": { "warehouse": 20, "in_stock": 0, "shops": { "7": 2 } },
+      "sku": "WDS100T4G0C",
+      "ean": "0718037885582"
+    },
+    {
+      "id": 1392056,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "Lexar NQ790 NVMe SSD, PCIe 4.0, M.2 Typ 2280 - 2 TB" },
+      "primary_category_id": 139,
+      "price": 189.9,
+      "original_price": 199.9,
+      "price_updated_at": "2026-09-23T10:09:00.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/andmekandjad/pooljuhtkettad-ssd/lexar-ssd-nq790-2tb-nvme-4x4-2280-70006000mbs-1392056"
+      },
+      "main_attributes": [
+        { "id": 23, "name": { "en": "Capacity" }, "values": { "en": ["2 TB"] } },
+        { "id": 185, "name": { "en": "Read speed" }, "values": { "en": ["7000 MB/s"] } },
+        { "id": 186, "name": { "en": "Write speed" }, "values": { "en": ["6000 MB/s"] } }
+      ],
+      "technical_details": [
+        {
+          "name": { "en": "Technical Details" },
+          "attributes": [
+            { "id": 164, "name": { "en": "Interface" }, "values": { "en": ["PCIe 4.0"] } },
+            { "id": 113, "name": { "en": "Form Factor" }, "values": { "en": ["M.2"] } }
+          ]
+        }
+      ],
+      "brand_name": "Lexar",
+      "stock": { "warehouse": 6, "in_stock": 0, "shops": {} },
+      "sku": "LNQ790X002T-RNNNG",
+      "ean": "0843367123456"
+    },
+    {
+      "id": 1183913,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "G.SKILL Ripjaws S5 32GB (2x16GB) DDR5-6000 CL30 UDIMM Memory Kit" },
+      "primary_category_id": 20,
+      "price": 129.9,
+      "original_price": 139.9,
+      "price_updated_at": "2026-09-23T10:08:00.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/malud-ram/gskill-ripjaws-s5-32-kit-16gbx2-gb-ddr5-6000-mhz-pcse-1183913"
+      },
+      "main_attributes": [
+        { "id": 27, "name": { "en": "Capacity" }, "values": { "en": ["32 GB"] } },
+        { "id": 28, "name": { "en": "Speed" }, "values": { "en": ["6000 MHz"] } },
+        { "id": 178, "name": { "en": "Type" }, "values": { "en": ["DDR5"] } },
+        { "id": 179, "name": { "en": "CL" }, "values": { "en": ["CL30"] } }
+      ],
+      "technical_details": [
+        {
+          "name": { "en": "Technical Details" },
+          "attributes": [
+            { "id": 181, "name": { "en": "Form Factor" }, "values": { "en": ["UDIMM"] } },
+            { "id": 182, "name": { "en": "Voltage" }, "values": { "en": ["1.35V"] } },
+            { "id": 180, "name": { "en": "Layout" }, "values": { "en": ["2 x 16 GB"] } }
+          ]
+        }
+      ],
+      "brand_name": "G.SKILL",
+      "stock": { "warehouse": 9, "in_stock": 0, "shops": {} },
+      "sku": "F5-6000J3038F16GX2-RS5K",
+      "ean": "4713294225977"
+    },
+    {
+      "id": 1436318,
+      "active": true,
+      "type": "PRODUCT",
+      "name": { "en": "ASRock AMD Radeon RX 9070 Challenger 16GB Graphics Card" },
+      "primary_category_id": 18,
+      "price": 749.9,
+      "original_price": 799.9,
+      "price_updated_at": "2026-09-23T10:06:00.000000Z",
+      "path": {
+        "et": "/arvutikomponendid/graafikakaardid-vga/asrock-rx-9070-16gb-radeon-challenger-3-ventilaatoriga-graaf-1436318"
+      },
+      "main_attributes": [
+        { "id": 15, "name": { "en": "Memory" }, "values": { "en": ["16 GB"] } },
+        { "id": 110, "name": { "en": "Chipset" }, "values": { "en": ["AMD Radeon RX 9070"] } },
+        { "id": 17, "name": { "en": "Memory type" }, "values": { "en": ["GDDR6"] } }
+      ],
+      "brand_name": "ASRock",
+      "stock": { "warehouse": 3, "in_stock": 0, "shops": {} },
+      "sku": "90-GA5ZZ-00UANF",
+      "ean": "4710483939871"
+    }
+  ]
+}

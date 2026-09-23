@@ -7,6 +7,11 @@ import type { ProductPriceSummaryRow } from "@/types/database";
 export function productSpecsFromRow(row: ProductPriceSummaryRow): ProductSpecs {
   return {
     chipset: row.chipset,
+    family: row.family,
+    socket: row.socket,
+    readSpeedMbs: row.read_speed_mbs,
+    writeSpeedMbs: row.write_speed_mbs,
+    interfaceType: row.interface_type,
     memoryType: row.memory_type,
     capacityGb: row.capacity_gb,
     speedMhz: row.speed_mhz,

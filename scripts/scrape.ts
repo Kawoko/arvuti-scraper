@@ -13,6 +13,7 @@ loadEnv();
 import { fetchAllProducts } from "@/lib/arvutitark/client";
 import { getScraperConfig } from "@/lib/arvutitark/config";
 import { CATEGORY_LIST } from "@/lib/categories";
+import { customItemsIdFilter } from "@/lib/custom-items";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { consoleScrapeLogger, runScrape, type ScrapeRpcClient, type ScrapeTarget } from "@/lib/scraper/run";
 
@@ -60,18 +61,42 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Every category shares the single daily claim, so this stays one
-  // "attempt per day" even as categories are added.
-  const targets: ScrapeTarget[] = CATEGORY_LIST.map((definition) => ({
-    category: definition.category,
-    categoryId: definition.arvutitarkCategoryId,
-    // Built-in filter, with a documented env override for graphics cards.
-    attributes: definition.category === "gpu" ? config.gpuAttributes : definition.attributes,
-  }));
+  // Every group shares the same claim, so adding a group never adds an extra
+  // fetch opportunity for the day.
+  const enabled = new Set(config.groups);
+  const skipped = CATEGORY_LIST.filter((definition) => !enabled.has(definition.category));
+
+  const targets: ScrapeTarget[] = CATEGORY_LIST.filter((definition) =>
+    enabled.has(definition.category),
+  ).map((definition) => {
+    // The pinned group is fetched by product id, so it deliberately carries no
+    // category or attribute filter — sending them would exclude these products.
+    if (definition.category === "custom") {
+      return {
+        category: definition.category,
+        categoryId: null,
+        attributes: null,
+        ids: customItemsIdFilter(),
+      };
+    }
+
+    return {
+      category: definition.category,
+      categoryId: definition.arvutitarkCategoryId,
+      // Built-in filter, with a documented env override for graphics cards.
+      attributes: definition.category === "gpu" ? config.gpuAttributes : definition.attributes,
+      brands: definition.brands,
+    };
+  });
 
   consoleScrapeLogger.info(
-    `Tracking ${targets.length} category(ies): ${targets.map((t) => t.category).join(", ")}`,
+    `Tracking ${targets.length} group(s): ${targets.map((t) => t.category).join(", ")}`,
   );
+  if (skipped.length > 0) {
+    consoleScrapeLogger.info(
+      `Skipped by SCRAPER_GROUPS: ${skipped.map((d) => d.category).join(", ")}`,
+    );
+  }
 
   const result = await runScrape({
     rpc,
@@ -84,8 +109,10 @@ async function main(): Promise<void> {
         maxPages: config.maxPages,
         debug: config.debug,
         onDebug: (message) => consoleScrapeLogger.info(message),
-        category: target.categoryId,
-        attributes: target.attributes,
+        category: target.categoryId ?? undefined,
+        attributes: target.attributes ?? undefined,
+        brands: target.brands,
+        ids: target.ids,
         onPage: ({ page, lastPage, count }) => {
           if (count === -1) {
             consoleScrapeLogger.info(

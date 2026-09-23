@@ -35,8 +35,10 @@ jobs:
           node-version: "22"
           cache: npm
 
+      # See ci.yml: `npm ci` cannot be used until the lockfile is regenerated on
+      # Linux, because the platform-gated wasm subtree is incomplete.
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-audit --no-fund
 
       - name: Run scraper
         # Secrets are injected at runtime only and are never echoed or written

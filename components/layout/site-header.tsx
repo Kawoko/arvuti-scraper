@@ -2,14 +2,18 @@ import Link from "next/link";
 import { Activity, Layers } from "lucide-react";
 
 import { ThemeToggle } from "./theme-toggle";
+import { CATEGORY_LIST } from "@/lib/categories";
 import { cn } from "@/lib/utils";
 
-export const NAV_LINKS = [
-  { href: "/", label: "RAM" },
-  { href: "/gpu", label: "GPUs" },
+/** Built from the category registry so a new group appears here for free. */
+export const NAV_LINKS: ReadonlyArray<{ href: string; label: string }> = [
+  ...CATEGORY_LIST.map((definition) => ({
+    href: definition.path,
+    label: definition.label,
+  })),
   { href: "/deals", label: "Deals" },
   { href: "/status", label: "Status" },
-] as const;
+];
 
 interface SiteHeaderProps {
   activePath: string;
@@ -27,7 +31,11 @@ export function SiteHeader({ activePath }: SiteHeaderProps) {
           <span className="sm:hidden">Tracker</span>
         </Link>
 
-        <nav aria-label="Main" className="ml-1 flex items-center gap-0.5">
+        {/* Eight groups plus two fixed links: scroll rather than wrap on small screens. */}
+        <nav
+          aria-label="Main"
+          className="ml-1 flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {NAV_LINKS.map((link) => {
             const active = link.href === activePath;
             return (

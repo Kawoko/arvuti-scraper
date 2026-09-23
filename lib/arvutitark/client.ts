@@ -37,8 +37,17 @@ export interface ProductPageParams {
   page: number;
   perPage?: number;
   sort?: string;
+  /** Attribute filter. Not sent for id-pinned requests. */
   attributes?: string;
+  /** Arvutitark category id. Not sent for id-pinned requests. */
   category?: number;
+  /** Brands filter. This parameter takes an ASCII comma, unlike attributes. */
+  brands?: string;
+  /**
+   * Comma-separated product ids. When set, the category and attribute filters
+   * are omitted: sending them would exclude the very products being pinned.
+   */
+  ids?: string;
   locale?: string;
 }
 
@@ -47,8 +56,15 @@ export function buildProductsUrl(baseUrl: string, params: ProductPageParams): st
   url.searchParams.set("page", String(params.page));
   url.searchParams.set("perPage", String(params.perPage ?? ARVUTITARK_PER_PAGE));
   url.searchParams.set("sort", params.sort ?? ARVUTITARK_SORT);
-  url.searchParams.set("attributes", params.attributes ?? ARVUTITARK_RAM_ATTRIBUTES);
-  url.searchParams.set("categories", String(params.category ?? ARVUTITARK_RAM_CATEGORY_ID));
+
+  if (params.ids) {
+    url.searchParams.set("ids", params.ids);
+  } else {
+    url.searchParams.set("attributes", params.attributes ?? ARVUTITARK_RAM_ATTRIBUTES);
+    url.searchParams.set("categories", String(params.category ?? ARVUTITARK_RAM_CATEGORY_ID));
+  }
+
+  if (params.brands) url.searchParams.set("brands", params.brands);
   url.searchParams.set("locale", params.locale ?? ARVUTITARK_LOCALE);
   return url.toString();
 }
@@ -152,6 +168,10 @@ export interface FetchAllOptions extends FetchOptions {
   category?: number;
   /** Attribute filter to request. Defaults to the RAM filter. */
   attributes?: string;
+  /** Brands filter, ASCII comma separated. */
+  brands?: string;
+  /** Comma-separated product ids for an id-pinned request. */
+  ids?: string;
   onPage?: (info: { page: number; lastPage: number; count: number }) => void;
 }
 
@@ -274,7 +294,13 @@ export async function fetchAllProducts(options: FetchAllOptions = {}): Promise<F
 
   for (;;) {
     const result = await fetchProductPage(
-      { page, category: options.category, attributes: options.attributes },
+      {
+        page,
+        category: options.category,
+        attributes: options.attributes,
+        brands: options.brands,
+        ids: options.ids,
+      },
       options,
     );
     const count = result.products.length;

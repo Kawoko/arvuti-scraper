@@ -47,7 +47,7 @@ interface Harness {
 }
 
 function createHarness(overrides: {
-  claim?: () => Promise<{ data: boolean | null; error: { message: string } | null }>;
+  claim?: () => Promise<{ data: number | null; error: { message: string } | null }>;
   ingest?: (args: Record<string, unknown>) => Promise<{
     data: { product_count: number; price_count: number } | null;
     error: { message: string } | null;
@@ -59,7 +59,8 @@ function createHarness(overrides: {
   const rpc: ScrapeRpcClient = {
     claim: async (args) => {
       calls.push({ name: "claim", args });
-      return overrides.claim ? overrides.claim() : { data: true, error: null };
+      // Slot 1 is the default claim in tests.
+      return overrides.claim ? overrides.claim() : { data: 1, error: null };
     },
     ingest: async (args) => {
       calls.push({ name: "ingest", args: args as unknown as Record<string, unknown> });
@@ -261,8 +262,8 @@ describe("runScrape daily claim guarantee", () => {
     expect(result.outcome).toBe("completed");
   });
 
-  it("does NOT contact Arvutitark when the day is already claimed", async () => {
-    const harness = createHarness({ claim: async () => ({ data: false, error: null }) });
+  it("does NOT contact Arvutitark when no slot is available", async () => {
+    const harness = createHarness({ claim: async () => ({ data: null, error: null }) });
     const fetchProducts = vi.fn(async () => ({ products: fixtureProducts, pageCount: 1 }));
 
     const result = await runScrape(makeDeps(harness, { fetchProducts }));
@@ -297,6 +298,41 @@ describe("runScrape daily claim guarantee", () => {
 
     expect(fetchProducts).not.toHaveBeenCalled();
     expect(result.outcome).toBe("failed");
+    expect(result.slot).toBeNull();
+  });
+
+  it("records the claimed slot on the run", async () => {
+    const harness = createHarness({ claim: async () => ({ data: 2, error: null }) });
+
+    const result = await runScrape(makeDeps(harness));
+
+    expect(result.outcome).toBe("completed");
+    expect(result.slot).toBe(2);
+    expect(finishCallFor(harness, "completed")?.args.p_slot).toBe(2);
+  });
+
+  it("reports slot 1 for the first collection of the day", async () => {
+    const harness = createHarness();
+
+    const result = await runScrape(makeDeps(harness));
+
+    expect(result.slot).toBe(1);
+    expect(finishCallFor(harness, "completed")?.args.p_slot).toBe(1);
+  });
+
+  it("sends the claimed slot when recording a failure", async () => {
+    const harness = createHarness({ claim: async () => ({ data: 2, error: null }) });
+
+    const result = await runScrape(
+      makeDeps(harness, {
+        fetchProducts: async () => {
+          throw new Error("Arvutitark responded with HTTP 503");
+        },
+      }),
+    );
+
+    expect(result.outcome).toBe("failed");
+    expect(finishCallFor(harness, "failed")?.args.p_slot).toBe(2);
   });
 
   it("marks the run failed when the retailer request fails, without retrying", async () => {

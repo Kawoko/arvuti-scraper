@@ -3,11 +3,17 @@ import { matchesCategoryCriteria, normalizeProduct, toSnapshotRow } from "@/lib/
 import { snapshotRowSchema } from "@/lib/arvutitark/validation";
 import type { ArvutitarkProduct, ComponentCategory, SnapshotRow } from "@/lib/arvutitark/types";
 
-/** One category to collect, with the Arvutitark filter that selects it. */
+/** One group to collect, with the Arvutitark filter that selects it. */
 export interface ScrapeTarget {
   category: ComponentCategory;
-  categoryId: number;
-  attributes: string;
+  /** Arvutitark category id, or null for the id-pinned group. */
+  categoryId: number | null;
+  /** Attribute filter, or null for the id-pinned group. */
+  attributes: string | null;
+  /** Brands filter, ASCII comma separated. */
+  brands?: string;
+  /** Comma-separated product ids. Present only for the pinned group. */
+  ids?: string;
 }
 
 /**
@@ -45,13 +51,20 @@ export interface ScrapeRpcError {
 export type ScrapeRpcResult<T> = { data: T; error: ScrapeRpcError | null };
 
 export interface ScrapeRpcClient {
-  claim(args: { p_scrape_date: string }): Promise<ScrapeRpcResult<boolean | null>>;
+  /**
+   * Claims the next available collection slot for the day.
+   *
+   * Returns the slot number that was claimed, or null when no slot is
+   * available (both already taken, or the second is not due yet).
+   */
+  claim(args: { p_scrape_date: string }): Promise<ScrapeRpcResult<number | null>>;
   ingest(args: {
     p_scrape_date: string;
     p_products: SnapshotRow[];
   }): Promise<ScrapeRpcResult<{ product_count: number; price_count: number } | null>>;
   finish(args: {
     p_scrape_date: string;
+    p_slot: number;
     p_status: "completed" | "failed";
     p_product_count: number | null;
     p_page_count: number | null;
@@ -79,6 +92,8 @@ export type ScrapeOutcome = "skipped" | "completed" | "failed";
 export interface ScrapeRunResult {
   outcome: ScrapeOutcome;
   scrapeDate: string;
+  /** Slot claimed for the day, or null when nothing was claimed. */
+  slot: number | null;
   productCount: number;
   pageCount: number;
   errorMessage: string | null;
@@ -182,25 +197,42 @@ export async function runScrape(deps: ScrapeRunDeps): Promise<ScrapeRunResult> {
   // ---------------------------------------------------------------------
   // 1. Claim today's slot. Must succeed before anything external happens.
   // ---------------------------------------------------------------------
-  let claimed: boolean;
+  let slot: number;
   try {
     const { data, error } = await deps.rpc.claim({ p_scrape_date: scrapeDate });
     if (error) throw new Error(error.message);
-    claimed = Boolean(data);
+
+    if (data === null || data === undefined) {
+      logger.info(
+        `No collection slot available for ${scrapeDate} (both slots already taken, or the second is not due yet). Exiting without contacting Arvutitark.`,
+      );
+      return {
+        outcome: "skipped",
+        scrapeDate,
+        slot: null,
+        productCount: 0,
+        pageCount: 0,
+        errorMessage: null,
+      };
+    }
+
+    slot = data;
   } catch (error) {
     const message = describeError(error);
     logger.error(
-      `Could not claim the daily scrape slot (${message}). Aborting without contacting Arvutitark.`,
+      `Could not claim a scrape slot (${message}). Aborting without contacting Arvutitark.`,
     );
-    return { outcome: "failed", scrapeDate, productCount: 0, pageCount: 0, errorMessage: message };
+    return {
+      outcome: "failed",
+      scrapeDate,
+      slot: null,
+      productCount: 0,
+      pageCount: 0,
+      errorMessage: message,
+    };
   }
 
-  if (!claimed) {
-    logger.info(`Scrape already claimed for ${scrapeDate}. Exiting without contacting Arvutitark.`);
-    return { outcome: "skipped", scrapeDate, productCount: 0, pageCount: 0, errorMessage: null };
-  }
-
-  logger.info("Daily slot claimed. Contacting Arvutitark.");
+  logger.info(`Claimed ${scrapeDate} slot ${slot} of 2. Contacting Arvutitark.`);
 
   // ---------------------------------------------------------------------
   // 2. For each category: fetch, normalize, validate and ingest.
@@ -214,7 +246,9 @@ export async function runScrape(deps: ScrapeRunDeps): Promise<ScrapeRunResult> {
   try {
     for (const target of deps.targets) {
       logger.info(
-        `--- ${target.category.toUpperCase()} (Arvutitark category ${target.categoryId}) ---`,
+        `--- ${target.category.toUpperCase()} ${
+          target.ids ? `(pinned ids ${target.ids})` : `(Arvutitark category ${target.categoryId})`
+        } ---`,
       );
 
       const fetched = await deps.fetchProducts(target);
@@ -255,6 +289,7 @@ export async function runScrape(deps: ScrapeRunDeps): Promise<ScrapeRunResult> {
 
     const { error: finishError } = await deps.rpc.finish({
       p_scrape_date: scrapeDate,
+      p_slot: slot,
       p_status: "completed",
       p_product_count: productCount,
       p_page_count: pageCount,
@@ -262,11 +297,12 @@ export async function runScrape(deps: ScrapeRunDeps): Promise<ScrapeRunResult> {
     });
     if (finishError) throw new Error(finishError.message);
 
-    logger.info(`Run for ${scrapeDate} completed successfully.`);
+    logger.info(`Run for ${scrapeDate} slot ${slot} completed successfully.`);
 
     return {
       outcome: "completed",
       scrapeDate,
+      slot,
       productCount,
       pageCount,
       errorMessage: null,
@@ -280,6 +316,7 @@ export async function runScrape(deps: ScrapeRunDeps): Promise<ScrapeRunResult> {
     try {
       const { error: finishError } = await deps.rpc.finish({
         p_scrape_date: scrapeDate,
+        p_slot: slot,
         p_status: "failed",
         p_product_count: null,
         p_page_count: null,
@@ -290,6 +327,6 @@ export async function runScrape(deps: ScrapeRunDeps): Promise<ScrapeRunResult> {
       logger.error(`Could not record failure status: ${describeError(finishFailure)}`);
     }
 
-    return { outcome: "failed", scrapeDate, productCount: 0, pageCount, errorMessage: message };
+    return { outcome: "failed", scrapeDate, slot, productCount: 0, pageCount, errorMessage: message };
   }
 }

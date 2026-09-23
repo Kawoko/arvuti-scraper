@@ -114,6 +114,16 @@ export interface RamSpecs {
 export interface ProductSpecs extends RamSpecs {
   /** Graphics card model, e.g. "NVIDIA GeForce RTX™ 5070". Null for RAM. */
   chipset: string | null;
+  /** CPU family, e.g. "AMD Ryzen™ 7". Null for non-CPU categories. */
+  family: string | null;
+  /** CPU socket, e.g. "AM5" or "LGA 1851". Null for non-CPU categories. */
+  socket: string | null;
+  /** Sequential read speed in MB/s. Storage only. */
+  readSpeedMbs: number | null;
+  /** Sequential write speed in MB/s. Storage only. */
+  writeSpeedMbs: number | null;
+  /** Storage interface, e.g. "PCIe 4.0" or "Serial ATA III". Storage only. */
+  interfaceType: string | null;
 }
 
 export const EMPTY_RAM_SPECS: RamSpecs = {
@@ -127,9 +137,22 @@ export const EMPTY_RAM_SPECS: RamSpecs = {
   voltage: null,
 };
 
-export const EMPTY_PRODUCT_SPECS: ProductSpecs = { ...EMPTY_RAM_SPECS, chipset: null };
+export const EMPTY_PRODUCT_SPECS: ProductSpecs = {
+  ...EMPTY_RAM_SPECS,
+  chipset: null,
+  family: null,
+  socket: null,
+  readSpeedMbs: null,
+  writeSpeedMbs: null,
+  interfaceType: null,
+};
 
-export type ComponentCategory = "ram" | "gpu";
+/**
+ * A tracked group. Each group stores its own product rows and price history, so
+ * enabling or refreshing one group can never overwrite another.
+ */
+export type ComponentCategory = "ram" | "gpu" | "cpu" | "hdd" | "ssd" | "custom";
+
 export type Retailer = "arvutitark";
 
 export interface NormalizedProduct {
@@ -143,6 +166,11 @@ export interface NormalizedProduct {
   brand: string | null;
   url: string | null;
   specs: ProductSpecs;
+  /**
+   * For the `custom` group, the Arvutitark category the product actually belongs
+   * to (detected from `primary_category_id`). Null for category-tracked rows.
+   */
+  sourceCategory: ComponentCategory | null;
   price: number;
   originalPrice: number | null;
   sourcePriceUpdatedAt: string | null;
@@ -163,7 +191,13 @@ export interface SnapshotRow {
   brand: string | null;
   url: string | null;
   category: ComponentCategory;
+  source_category: ComponentCategory | null;
   chipset: string | null;
+  family: string | null;
+  socket: string | null;
+  read_speed_mbs: number | null;
+  write_speed_mbs: number | null;
+  interface_type: string | null;
   memory_type: string | null;
   capacity_gb: number | null;
   speed_mhz: number | null;

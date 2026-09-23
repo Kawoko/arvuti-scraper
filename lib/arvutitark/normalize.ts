@@ -2,6 +2,8 @@ import { isRecord, toFiniteNumber, toIntegerOrNull } from "@/lib/utils";
 import {
   ARVUTITARK_ATTRIBUTE_IDS,
   ARVUTITARK_CATEGORY_BY_ID,
+  ARVUTITARK_CPU_FAMILIES,
+  ARVUTITARK_CPU_SOCKETS,
   ARVUTITARK_GPU_ATTRIBUTE_IDS,
   ARVUTITARK_GPU_CHIPSETS,
   ARVUTITARK_GPU_VRAM_GB,
@@ -397,6 +399,11 @@ export function extractRamSpecs(product: ArvutitarkProduct): ProductSpecs {
     formFactor,
     voltage,
     chipset: null,
+    family: null,
+    socket: null,
+    readSpeedMbs: null,
+    writeSpeedMbs: null,
+    interfaceType: null,
   };
 }
 
@@ -496,6 +503,147 @@ export function extractGpuSpecs(product: ArvutitarkProduct): ProductSpecs {
     formFactor: null,
     voltage: null,
     chipset,
+    family: null,
+    socket: null,
+    readSpeedMbs: null,
+    writeSpeedMbs: null,
+    interfaceType: null,
+  };
+}
+
+/* ==========================================================================
+ * CPU specification parsing
+ * ========================================================================== */
+
+/** Canonical key for comparison: trademark symbols stripped, upper-cased. */
+function normalizeLabelKey(text: string): string {
+  return text
+    .replace(/[\u2122\u00AE]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
+/** Longest-match a tracked CPU family out of free text. */
+export function matchCpuFamily(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const haystack = normalizeLabelKey(text);
+
+  let best: string | null = null;
+  let bestLength = 0;
+  for (const family of ARVUTITARK_CPU_FAMILIES) {
+    const key = normalizeLabelKey(family);
+    if (key.length > bestLength && haystack.includes(key)) {
+      best = family;
+      bestLength = key.length;
+    }
+  }
+  return best;
+}
+
+/** Detect a tracked CPU socket in free text. */
+export function matchCpuSocket(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const haystack = normalizeLabelKey(text);
+  for (const socket of ARVUTITARK_CPU_SOCKETS) {
+    if (haystack.includes(normalizeLabelKey(socket))) return socket;
+  }
+  return null;
+}
+
+export function extractCpuSpecs(product: ArvutitarkProduct): ProductSpecs {
+  const entries = extractAttributeEntries(product);
+  const attribute = (id: number) => getAttributeText(entries, id);
+
+  const { name, nameEn } = resolveProductName(product.name);
+  const nameText = [nameEn, name].filter((value): value is string => Boolean(value)).join(" ");
+
+  // The retailer's family value is the same string as the filter value, e.g.
+  // "AMD Ryzen™ 5", so it is kept verbatim. The name is only a fallback.
+  const familyRaw = attribute(ARVUTITARK_ATTRIBUTE_IDS.cpuFamily);
+  const socketRaw = attribute(ARVUTITARK_ATTRIBUTE_IDS.cpuSocket);
+
+  return {
+    memoryType: null,
+    capacityGb: null,
+    speedMhz: null,
+    casLatency: null,
+    moduleCount: null,
+    capacityPerModuleGb: null,
+    formFactor: null,
+    voltage: null,
+    chipset: null,
+    family: normalizeOptionalText(familyRaw) ?? matchCpuFamily(nameText),
+    socket: normalizeOptionalText(socketRaw) ?? matchCpuSocket(nameText),
+    readSpeedMbs: null,
+    writeSpeedMbs: null,
+    interfaceType: null,
+  };
+}
+
+/* ==========================================================================
+ * Storage specification parsing (HDD and SSD)
+ * ========================================================================== */
+
+/** `"5000 MB/s"` -> 5000. Also tolerates `"5000MB/s"` and `"5 GB/s"`. */
+export function parseTransferRateMbs(text: string | null | undefined): number | null {
+  if (!text) return null;
+
+  const gb = text.match(/(\d+(?:[.,]\d+)?)\s*GB\s*\/\s*s/i);
+  if (gb) {
+    const value = Number(gb[1].replace(",", ".")) * 1024;
+    return value >= 1 && value <= 100_000 ? Math.round(value) : null;
+  }
+
+  const mb = text.match(/(\d+(?:[.,]\d+)?)\s*MB\s*\/\s*s/i);
+  if (mb) {
+    const value = Number(mb[1].replace(",", "."));
+    return value >= 1 && value <= 100_000 ? Math.round(value) : null;
+  }
+
+  return parseBareNumber(text, 1, 100_000);
+}
+
+/**
+ * Extract specs for an HDD or SSD.
+ *
+ * `capacityGb` holds the drive capacity and `formFactor` the physical size
+ * (e.g. `3.5"` or `M.2 22x80mm`), both of which come straight from the
+ * retailer's own attributes.
+ */
+export function extractStorageSpecs(
+  product: ArvutitarkProduct,
+  category: "hdd" | "ssd",
+): ProductSpecs {
+  const entries = extractAttributeEntries(product);
+  const attribute = (id: number) => getAttributeText(entries, id);
+
+  const { name, nameEn } = resolveProductName(product.name);
+  const nameText = [nameEn, name].filter((value): value is string => Boolean(value)).join(" ");
+
+  const capacityRaw = attribute(
+    category === "ssd"
+      ? ARVUTITARK_ATTRIBUTE_IDS.ssdCapacity
+      : ARVUTITARK_ATTRIBUTE_IDS.hddCapacity,
+  );
+
+  return {
+    memoryType: null,
+    capacityGb: parseCapacityGb(capacityRaw) ?? parseBareNumber(capacityRaw, 1, 100_000) ?? parseCapacityGb(nameText),
+    speedMhz: null,
+    casLatency: null,
+    moduleCount: null,
+    capacityPerModuleGb: null,
+    formFactor:
+      normalizeOptionalText(attribute(ARVUTITARK_ATTRIBUTE_IDS.formFactorStorage)) ??
+      parseFormFactor(nameText),
+    voltage: null,
+    chipset: null,
+    family: null,
+    socket: null,
+    readSpeedMbs: parseTransferRateMbs(attribute(ARVUTITARK_ATTRIBUTE_IDS.readSpeed)),
+    writeSpeedMbs: parseTransferRateMbs(attribute(ARVUTITARK_ATTRIBUTE_IDS.writeSpeed)),
+    interfaceType: normalizeOptionalText(attribute(ARVUTITARK_ATTRIBUTE_IDS.interfaceType)),
   };
 }
 
@@ -504,7 +652,30 @@ export function extractSpecs(
   product: ArvutitarkProduct,
   category: ComponentCategory,
 ): ProductSpecs {
-  return category === "gpu" ? extractGpuSpecs(product) : extractRamSpecs(product);
+  switch (category) {
+    case "gpu":
+      return extractGpuSpecs(product);
+    case "cpu":
+      return extractCpuSpecs(product);
+    case "hdd":
+    case "ssd":
+      return extractStorageSpecs(product, category);
+    case "custom":
+      return extractCustomSpecs(product);
+    case "ram":
+    default:
+      return extractRamSpecs(product);
+  }
+}
+
+/**
+ * Custom-tracked items have no category of their own, so specs are extracted
+ * using whichever category the retailer files the product under.
+ */
+export function extractCustomSpecs(product: ArvutitarkProduct): ProductSpecs {
+  const source = declaredCategoryOf(product);
+  if (source === null || source === "custom") return extractRamSpecs(product);
+  return extractSpecs(product, source);
 }
 
 /* ==========================================================================
@@ -589,9 +760,12 @@ export function normalizeProduct(
   const id = coerceProductId(raw.id);
   if (id === null) return null;
 
-  // Reject a product the retailer files under a different category.
+  // Reject a product the retailer files under a different category. The custom
+  // group is exempt: it deliberately pins products from any category.
   const declaredCategory = declaredCategoryOf(raw);
-  if (declaredCategory !== null && declaredCategory !== category) return null;
+  if (category !== "custom" && declaredCategory !== null && declaredCategory !== category) {
+    return null;
+  }
 
   const { name, nameEn } = resolveProductName(raw.name);
   if (!name) return null;
@@ -615,6 +789,7 @@ export function normalizeProduct(
       localizedName(raw.brand, "et"),
     url: buildProductUrl(raw.path),
     specs: extractSpecs(raw, category),
+    sourceCategory: category === "custom" ? declaredCategory : null,
     price,
     originalPrice: toFiniteNumber(raw.original_price),
     sourcePriceUpdatedAt: normalizeIsoTimestamp(raw.price_updated_at),
@@ -660,7 +835,20 @@ export function matchesGpuCriteria(product: NormalizedProduct): boolean {
 
 /** Apply the criteria for the product's own category. */
 export function matchesCategoryCriteria(product: NormalizedProduct): boolean {
-  return product.category === "gpu" ? matchesGpuCriteria(product) : matchesRamCriteria(product);
+  switch (product.category) {
+    case "gpu":
+      return matchesGpuCriteria(product);
+    case "ram":
+      return matchesRamCriteria(product);
+    // CPU, storage and custom groups are already constrained by their filter
+    // (or explicitly pinned by product id), so nothing further is rejected.
+    case "cpu":
+    case "hdd":
+    case "ssd":
+    case "custom":
+    default:
+      return true;
+  }
 }
 
 /** Deduplicate raw products by Arvutitark product id, keeping the first seen. */
@@ -686,7 +874,13 @@ export function toSnapshotRow(product: NormalizedProduct): SnapshotRow {
     brand: product.brand,
     url: product.url,
     category: product.category,
+    source_category: product.sourceCategory,
     chipset: product.specs.chipset,
+    family: product.specs.family,
+    socket: product.specs.socket,
+    read_speed_mbs: product.specs.readSpeedMbs,
+    write_speed_mbs: product.specs.writeSpeedMbs,
+    interface_type: product.specs.interfaceType,
     memory_type: product.specs.memoryType,
     capacity_gb: product.specs.capacityGb,
     speed_mhz: product.specs.speedMhz,
@@ -704,6 +898,12 @@ export function toSnapshotRow(product: NormalizedProduct): SnapshotRow {
   };
 }
 
+/** `2048` -> `2 TB`, `500` -> `500 GB`. Drive capacities are often powers of two. */
+function formatCapacityGb(capacityGb: number): string {
+  if (capacityGb >= 1024 && capacityGb % 1024 === 0) return `${capacityGb / 1024} TB`;
+  return `${capacityGb} GB`;
+}
+
 /** Human-readable one-line spec summary. */
 export function formatSpecSummary(specs: ProductSpecs): string {
   // Graphics cards read best as chipset first, then VRAM and memory technology.
@@ -712,6 +912,27 @@ export function formatSpecSummary(specs: ProductSpecs): string {
     if (specs.capacityGb !== null) cardParts.push(`${specs.capacityGb}GB`);
     if (specs.memoryType !== null) cardParts.push(specs.memoryType);
     return cardParts.join(" · ");
+  }
+
+  // CPUs: family and socket.
+  if (specs.family !== null || specs.socket !== null) {
+    return [specs.family, specs.socket]
+      .filter((value): value is string => value !== null)
+      .join(" · ");
+  }
+
+  // Drives: capacity, interface, then read/write throughput.
+  if (specs.readSpeedMbs !== null || specs.writeSpeedMbs !== null) {
+    const driveParts: string[] = [];
+    if (specs.capacityGb !== null) driveParts.push(formatCapacityGb(specs.capacityGb));
+    if (specs.formFactor !== null) driveParts.push(specs.formFactor);
+    if (specs.interfaceType !== null) driveParts.push(specs.interfaceType);
+    if (specs.readSpeedMbs !== null && specs.writeSpeedMbs !== null) {
+      driveParts.push(`${specs.readSpeedMbs}/${specs.writeSpeedMbs} MB/s`);
+    } else if (specs.readSpeedMbs !== null) {
+      driveParts.push(`${specs.readSpeedMbs} MB/s read`);
+    }
+    return driveParts.join(" · ");
   }
 
   const parts: string[] = [];

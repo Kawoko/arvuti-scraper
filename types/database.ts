@@ -13,6 +13,8 @@ export type ScrapeRunStatus = "running" | "completed" | "failed";
 
 export type ScrapeRunRow = {
   scrape_date: string;
+  /** 1 = first collection of the Tallinn day, 2 = the second. */
+  slot: number;
   attempted_at: string;
   finished_at: string | null;
   status: ScrapeRunStatus;
@@ -25,6 +27,7 @@ export type ProductRow = {
   id: number;
   retailer: string;
   category: string;
+  source_category: string | null;
   sku: string | null;
   ean: string | null;
   name: string;
@@ -34,6 +37,11 @@ export type ProductRow = {
   first_seen_at: string;
   last_seen_at: string;
   chipset: string | null;
+  family: string | null;
+  socket: string | null;
+  read_speed_mbs: number | null;
+  write_speed_mbs: number | null;
+  interface_type: string | null;
   memory_type: string | null;
   capacity_gb: number | null;
   speed_mhz: number | null;
@@ -47,6 +55,7 @@ export type ProductRow = {
 export type PriceHistoryRow = {
   id: number;
   product_id: number;
+  category: string;
   observed_date: string;
   observed_at: string;
   price: number;
@@ -61,6 +70,7 @@ export type ProductPriceSummaryRow = {
   product_id: number;
   retailer: string;
   category: string;
+  source_category: string | null;
   sku: string | null;
   ean: string | null;
   name: string;
@@ -68,6 +78,11 @@ export type ProductPriceSummaryRow = {
   brand: string | null;
   url: string | null;
   chipset: string | null;
+  family: string | null;
+  socket: string | null;
+  read_speed_mbs: number | null;
+  write_speed_mbs: number | null;
+  interface_type: string | null;
   memory_type: string | null;
   capacity_gb: number | null;
   speed_mhz: number | null;
@@ -160,11 +175,13 @@ export type Database = {
     Functions: {
       claim_scrape_run: {
         Args: { p_scrape_date: string };
-        Returns: boolean;
+        /** Returns the slot claimed (1 or 2), or null when none is available. */
+        Returns: number | null;
       };
       finish_scrape_run: {
         Args: {
           p_scrape_date: string;
+          p_slot: number;
           p_status: ScrapeRunStatus;
           p_product_count?: number | null;
           p_page_count?: number | null;

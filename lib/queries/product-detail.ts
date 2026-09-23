@@ -1,3 +1,4 @@
+import type { ComponentCategory } from "@/lib/arvutitark/types";
 import { getSupabaseReadClient } from "@/lib/supabase/server";
 import type { ProductPriceSummaryRow } from "@/types/database";
 import { DataAccessError } from "./errors";
@@ -26,13 +27,24 @@ function shopStockTotal(shopStock: Record<string, number> | null): number {
   return Object.values(shopStock).reduce((sum, value) => sum + (Number(value) || 0), 0);
 }
 
-export async function getProductDetail(productId: number): Promise<ProductDetail | null> {
+/**
+ * Load one product's current stats and its full daily history.
+ *
+ * Scoped by group as well as product id: the same retailer product can be
+ * tracked in two groups (for example in `gpu` and again as a pinned `custom`
+ * item), and each group has its own independent history.
+ */
+export async function getProductDetail(
+  productId: number,
+  category: ComponentCategory,
+): Promise<ProductDetail | null> {
   const supabase = getSupabaseReadClient();
 
   const { data: summary, error: summaryError } = await supabase
     .from("product_price_summary")
     .select("*")
     .eq("product_id", productId)
+    .eq("category", category)
     .maybeSingle();
 
   if (summaryError) {
@@ -44,6 +56,7 @@ export async function getProductDetail(productId: number): Promise<ProductDetail
     .from("price_history")
     .select("observed_date,observed_at,price,original_price,warehouse_stock,local_stock,shop_stock")
     .eq("product_id", productId)
+    .eq("category", category)
     .order("observed_date", { ascending: true });
 
   if (historyError) {
