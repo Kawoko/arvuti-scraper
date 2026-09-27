@@ -12,7 +12,7 @@
 export const PAGE_SIZE = 24;
 
 export type PriceStatus = "all" | "below_start" | "above_start" | "at_low";
-export type AvailabilityFilter = "all" | "in_stock";
+export type AvailabilityFilter = "all" | "in_stock" | "out_of_stock" | "delisted";
 export type DiscountThreshold = "any" | "5" | "10" | "15" | "20";
 
 /** Sortable columns. Each maps to one column in `product_price_summary`. */
@@ -157,6 +157,8 @@ export const DISCOUNT_OPTIONS: ReadonlyArray<{ value: DiscountThreshold; label: 
 export const AVAILABILITY_OPTIONS: ReadonlyArray<{ value: AvailabilityFilter; label: string }> = [
   { value: "all", label: "All" },
   { value: "in_stock", label: "In stock only" },
+  { value: "out_of_stock", label: "Out of stock" },
+  { value: "delisted", label: "No longer listed" },
 ];
 
 export type SearchParamsInput = Record<string, string | string[] | undefined>;
@@ -190,7 +192,12 @@ function readEnum<T extends string>(
 }
 
 const PRICE_STATUS_VALUES: ReadonlyArray<PriceStatus> = ["all", "below_start", "above_start", "at_low"];
-const AVAILABILITY_VALUES: ReadonlyArray<AvailabilityFilter> = ["all", "in_stock"];
+const AVAILABILITY_VALUES: ReadonlyArray<AvailabilityFilter> = [
+  "all",
+  "in_stock",
+  "out_of_stock",
+  "delisted",
+];
 const DISCOUNT_VALUES: ReadonlyArray<DiscountThreshold> = ["any", "5", "10", "15", "20"];
 
 export function parseProductFilters(input: SearchParamsInput): ProductFilters {

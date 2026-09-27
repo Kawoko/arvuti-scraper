@@ -22,7 +22,7 @@ export function ProductCard({ row }: { row: ProductPriceSummaryRow }) {
           {row.brand ? <p className="text-xs text-muted-foreground">{row.brand}</p> : null}
           <p className="line-clamp-2 text-sm font-medium leading-snug">{row.name}</p>
         </div>
-        <StockBadge inStock={row.in_stock} className="shrink-0" />
+        <StockBadge inStock={row.in_stock} delisted={row.is_delisted} className="shrink-0" />
       </div>
 
       <p className="mt-2 text-xs text-muted-foreground">{specs || EMPTY_VALUE}</p>

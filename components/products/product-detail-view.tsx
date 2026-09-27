@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { CategoryDefinition } from "@/lib/categories";
-import { formatCurrency, formatDateTime, formatInteger } from "@/lib/format";
+import { formatCurrency, formatDate, formatDateTime, formatInteger } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
 import type { ProductDetail } from "@/lib/queries/product-detail";
 
@@ -111,7 +111,7 @@ export function ProductDetailView({ detail, definition }: ProductDetailViewProps
                 {formatCurrency(summary.current_price)}
               </span>
               <PriceChange change={summary.price_change} percent={summary.price_change_percent} />
-              <StockBadge inStock={summary.in_stock} />
+              <StockBadge inStock={summary.in_stock} delisted={summary.is_delisted} />
             </div>
           </div>
 
@@ -124,6 +124,17 @@ export function ProductDetailView({ detail, definition }: ProductDetailViewProps
             </Button>
           ) : null}
         </header>
+
+        {summary.is_delisted ? (
+          <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            <Info className="mt-0.5 size-3.5 shrink-0" />
+            <p>
+              Arvutitark no longer lists this product. The price shown is the last one we recorded,
+              on {formatDate(summary.last_seen_date)}. Its history is kept so you can still see how
+              it moved.
+            </p>
+          </div>
+        ) : null}
 
         <ProductPriceStats row={summary} />
 
@@ -163,7 +174,11 @@ export function ProductDetailView({ detail, definition }: ProductDetailViewProps
             <CardHeader>
               <CardTitle>Availability</CardTitle>
               <CardDescription>
-                {summary.in_stock ? "Available at Arvutitark" : "Currently out of stock"}
+                {summary.is_delisted
+                  ? `Removed from the shop. Last seen ${formatDate(summary.last_seen_date)}.`
+                  : summary.in_stock
+                    ? "Available at Arvutitark"
+                    : "Currently out of stock"}
               </CardDescription>
             </CardHeader>
             <CardContent>

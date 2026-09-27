@@ -196,3 +196,21 @@ describe("filter helpers", () => {
     expect(buildProductHref("/", cleared)).toBe("/?sort=lowest&dir=desc");
   });
 });
+
+describe("availability filter", () => {
+  it("parses the out-of-stock and delisted options", () => {
+    expect(parseProductFilters({ availability: "out_of_stock" }).availability).toBe("out_of_stock");
+    expect(parseProductFilters({ availability: "delisted" }).availability).toBe("delisted");
+  });
+
+  it("falls back to all for an unknown availability", () => {
+    expect(parseProductFilters({ availability: "sold_out" }).availability).toBe("all");
+  });
+
+  it("round-trips a non-default availability and counts it as a filter", () => {
+    const filters: ProductFilters = { ...DEFAULT_FILTERS, availability: "delisted" };
+
+    expect(buildProductQuery(filters)).toBe("?availability=delisted");
+    expect(countActiveFilters(filters)).toBe(1);
+  });
+});

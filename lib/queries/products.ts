@@ -8,8 +8,12 @@ import { DataAccessError } from "./errors";
  * Columns needed by the product list. The summary view is queried instead of
  * the full price history so list rendering never touches historical rows.
  */
-const LIST_COLUMNS = [
+export const LIST_COLUMNS = [
   "product_id",
+  // Required: product detail links are built from this, and without it every
+  // link silently falls back to /ram.
+  "category",
+  "source_category",
   "name",
   "name_en",
   "brand",
@@ -32,6 +36,10 @@ const LIST_COLUMNS = [
   "lowest_price",
   "current_total_stock",
   "in_stock",
+  "last_seen_date",
+  // Delisted marks a product the retailer no longer returns; it must be
+  // selected here or the badge and availability filter silently do nothing.
+  "is_delisted",
   "is_below_start_price",
   "is_at_historical_low",
 ].join(",");
@@ -84,6 +92,10 @@ export async function getProductList(
   if (moduleCount !== null) query = query.eq("module_count", moduleCount);
 
   if (filters.availability === "in_stock") query = query.eq("in_stock", true);
+  if (filters.availability === "out_of_stock") {
+    query = query.eq("in_stock", false).eq("is_delisted", false);
+  }
+  if (filters.availability === "delisted") query = query.eq("is_delisted", true);
 
   if (filters.priceStatus === "below_start") query = query.eq("is_below_start_price", true);
   if (filters.priceStatus === "above_start") query = query.eq("is_above_start_price", true);

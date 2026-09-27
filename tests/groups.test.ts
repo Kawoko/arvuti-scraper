@@ -21,6 +21,8 @@ import {
 import type { ArvutitarkProduct } from "@/lib/arvutitark/types";
 import { CATEGORY_LIST, productDetailHref } from "@/lib/categories";
 import { CUSTOM_ITEM_IDS, customItemsIdFilter } from "@/lib/custom-items";
+import { DEAL_COLUMNS } from "@/lib/queries/deals";
+import { LIST_COLUMNS } from "@/lib/queries/products";
 import { buildSnapshotRows } from "@/lib/scraper/run";
 
 import groupsFixture from "./fixtures/arvutitark-groups-page.json";
@@ -274,12 +276,47 @@ describe("product links stay inside their own group", () => {
     expect(offenders).toEqual([]);
   });
 
+  it("selects the columns that product links depend on", () => {
+    // The real regression guard. A missing `category` column does not throw: the
+    // row's category is simply undefined, productDetailHref falls back to /ram,
+    // and every SSD/HDD/CPU/GPU link silently points at the RAM group. Scanning
+    // for the literal string "/ram/" does not catch that, so this asserts the
+    // data contract the link depends on.
+    for (const [name, columns] of [
+      ["LIST_COLUMNS", LIST_COLUMNS],
+      ["DEAL_COLUMNS", DEAL_COLUMNS],
+    ] as const) {
+      const selected = columns.split(",");
+      expect(selected, `${name} must select category`).toContain("category");
+      expect(selected, `${name} must select is_delisted`).toContain("is_delisted");
+      expect(selected, `${name} must select last_seen_date`).toContain("last_seen_date");
+    }
+  });
+
+  it("falls back to the RAM path only for an unknown category", () => {
+    // Documents the fallback that hid the bug, so its behaviour is explicit.
+    expect(productDetailHref("nonsense", 1)).toBe("/ram/1");
+    expect(productDetailHref("", 1)).toBe("/ram/1");
+  });
+
   it("routes a non-RAM product id to its own group", () => {
     // The same numeric id means a different product in a different group.
     expect(productDetailHref("ssd", 1420998)).not.toContain("/ram/");
     expect(productDetailHref("hdd", 1210237)).not.toContain("/ram/");
     expect(productDetailHref("cpu", 1375186)).not.toContain("/ram/");
     expect(productDetailHref("gpu", 1527001)).not.toContain("/ram/");
+  });
+
+  it("passes the delisted flag to every stock badge", () => {
+    // A stock badge without `delisted` keeps showing "In stock" for a product
+    // the retailer removed, because the last recorded stock figure is frozen.
+    const offenders = sourceFiles().filter((file) => {
+      const source = readFileSync(file, "utf8");
+      const badges = source.match(/<StockBadge[^>]*>/g) ?? [];
+      return badges.some((badge) => !badge.includes("delisted="));
+    });
+
+    expect(offenders).toEqual([]);
   });
 });
 

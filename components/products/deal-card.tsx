@@ -71,7 +71,7 @@ export function DealCard({ row }: { row: ProductPriceSummaryRow }) {
           ) : null}
         </div>
         <div className="flex flex-col items-end gap-2">
-          <StockBadge inStock={row.in_stock} />
+          <StockBadge inStock={row.in_stock} delisted={row.is_delisted} />
           <p className="text-xs text-muted-foreground tabular">
             Low {formatCurrency(row.lowest_price)}
           </p>

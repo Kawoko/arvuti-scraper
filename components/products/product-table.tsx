@@ -161,7 +161,7 @@ export function ProductTable({ rows, filters, pathname = "/" }: ProductTableProp
                 </TableCell>
 
                 <TableCell className="pl-5">
-                  <StockBadge inStock={row.in_stock} />
+                  <StockBadge inStock={row.in_stock} delisted={row.is_delisted} />
                 </TableCell>
 
                 <TableCell className="pr-5 text-right text-xs text-muted-foreground">

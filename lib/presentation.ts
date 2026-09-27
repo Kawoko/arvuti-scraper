@@ -39,7 +39,8 @@ export function changeDirectionFromRow(row: ProductPriceSummaryRow): PriceDirect
   return directionFromChange(row.price_change);
 }
 
-export function stockLabel(inStock: boolean): string {
+export function stockLabel(inStock: boolean, delisted = false): string {
+  if (delisted) return "No longer listed";
   return inStock ? "In stock" : "Out of stock";
 }
 

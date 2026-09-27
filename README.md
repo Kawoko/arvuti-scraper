@@ -73,6 +73,23 @@ the same product tracked under `gpu` — or vice versa. The pinned ASRock RX 907
 above is deliberately an example of exactly this: it also matches the GPU
 filter, so it legitimately exists in both groups with separate histories.
 
+### Deals per group
+
+`/deals` has a **group selector** (`?group=`) so each category can be reviewed on
+its own instead of everything being pooled into one list:
+
+```
+/deals                       all groups
+/deals?group=ssd             SSD deals only
+/deals?group=gpu&tab=new_lows  GPU deals at a historical low
+```
+
+`All groups` is the default. The selected group is preserved when switching the
+deal tab, and clicking any deal card opens that product under **its own** group,
+since the same numeric id means a different product in a different group. When
+viewing all groups, each card carries a small badge showing which group it came
+from.
+
 The GPU chipset filter is a whitelist built from
 [`ARVUTITARK_GPU_CHIPSETS`](lib/arvutitark/config.ts:95). Products are additionally
 checked locally, so a card the retailer files outside the whitelist is dropped

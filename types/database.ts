@@ -93,6 +93,12 @@ export type ProductPriceSummaryRow = {
   voltage: number | null;
   first_seen_at: string;
   last_seen_at: string;
+  /** Most recent completed collection, as a Tallinn calendar date. */
+  latest_scrape_date: string | null;
+  /** The last collection that actually returned this product, Tallinn date. */
+  last_seen_date: string | null;
+  /** True when the retailer no longer returns this product. */
+  is_delisted: boolean;
   start_date: string;
   start_price: number;
   current_date: string;

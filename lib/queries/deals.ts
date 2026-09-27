@@ -12,8 +12,12 @@ export const DEALS_TABS: ReadonlyArray<{ value: DealsTab; label: string }> = [
   { value: "in_stock", label: "In stock" },
 ];
 
-const DEAL_COLUMNS = [
+export const DEAL_COLUMNS = [
   "product_id",
+  // Required: product detail links and React keys are built from this. Without
+  // it every deal links to /ram and duplicate product ids collide.
+  "category",
+  "source_category",
   "name",
   "name_en",
   "brand",
@@ -38,6 +42,9 @@ const DEAL_COLUMNS = [
   "observation_count",
   "current_total_stock",
   "in_stock",
+  "last_seen_date",
+  // Delisted marks a product the retailer no longer returns.
+  "is_delisted",
   "is_below_start_price",
   "is_at_historical_low",
 ].join(",");
