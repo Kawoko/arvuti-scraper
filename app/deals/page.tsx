@@ -1,12 +1,23 @@
+import { Suspense } from "react";
 import { Tag } from "lucide-react";
 
+import { GroupSelect } from "@/components/filters/group-select";
 import { TabLinks } from "@/components/filters/tab-links";
 import { PageShell } from "@/components/layout/page-shell";
 import { DealCard } from "@/components/products/deal-card";
 import { StaleDataNotice } from "@/components/products/stale-data-notice";
 import { EmptyState } from "@/components/ui/empty-state";
-import { DEALS_TABS, getDeals, getDealsTabCounts, isDealsTab, type DealsTab } from "@/lib/queries/deals";
-import { getDashboardStats } from "@/lib/queries/stats";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { ComponentCategory } from "@/lib/arvutitark/types";
+import { CATEGORY_LIST, isComponentCategory } from "@/lib/categories";
+import {
+  DEALS_TABS,
+  getDeals,
+  getDealsTabCounts,
+  isDealsTab,
+  type DealsTab,
+} from "@/lib/queries/deals";
+import { getDataFreshness } from "@/lib/queries/stats";
 
 export const dynamic = "force-dynamic";
 
@@ -14,11 +25,25 @@ interface DealsPageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+function readParam(value: string | string[] | undefined): string | null {
+  if (Array.isArray(value)) return value[0] ?? null;
+  return value ?? null;
+}
+
+/** Preserves the selected group when switching deal tab, and vice versa. */
+function dealsHref(group: string, tab: DealsTab): string {
+  const params = new URLSearchParams();
+  if (group !== "all") params.set("group", group);
+  if (tab !== "biggest_drops") params.set("tab", tab);
+  const query = params.toString();
+  return query ? `/deals?${query}` : "/deals";
+}
+
 const EMPTY_COPY: Record<DealsTab, { title: string; description: string }> = {
   biggest_drops: {
     title: "No price drops recorded",
     description:
-      "Nothing is currently cheaper than the price we first recorded. Check back after the next daily collection.",
+      "Nothing is currently cheaper than the price we first recorded. Check back after the next collection.",
   },
   new_lows: {
     title: "No products at a historical low",
@@ -36,21 +61,26 @@ const EMPTY_COPY: Record<DealsTab, { title: string; description: string }> = {
 
 export default async function DealsPage({ searchParams }: DealsPageProps) {
   const resolvedSearchParams = await searchParams;
-  const rawTab = Array.isArray(resolvedSearchParams.tab)
-    ? resolvedSearchParams.tab[0]
-    : resolvedSearchParams.tab;
+
+  const rawTab = readParam(resolvedSearchParams.tab);
   const tab: DealsTab = isDealsTab(rawTab) ? rawTab : "biggest_drops";
 
-  const [deals, counts, stats] = await Promise.all([
-    getDeals(tab),
-    getDealsTabCounts(),
-    getDashboardStats(),
+  const rawGroup = readParam(resolvedSearchParams.group);
+  const group: ComponentCategory | undefined =
+    rawGroup !== null && isComponentCategory(rawGroup) ? rawGroup : undefined;
+
+  const [deals, counts, freshness] = await Promise.all([
+    getDeals(tab, group),
+    getDealsTabCounts(group),
+    getDataFreshness(),
   ]);
+
+  const groupLabel = group ? (CATEGORY_LIST.find((d) => d.category === group)?.label ?? null) : null;
 
   const tabLinks = DEALS_TABS.map((item) => ({
     value: item.value,
     label: item.label,
-    href: item.value === "biggest_drops" ? "/deals" : `/deals?tab=${item.value}`,
+    href: dealsHref(group ?? "all", item.value),
     count: counts[item.value],
   }));
 
@@ -64,25 +94,43 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
           </p>
         </header>
 
-        <StaleDataNotice staleDays={stats.staleDays} />
+        <StaleDataNotice staleDays={freshness.staleDays} />
 
-        <TabLinks items={tabLinks} active={tab} ariaLabel="Deal categories" />
+        <div className="flex flex-wrap items-center gap-3">
+          <Suspense fallback={<Skeleton className="h-9 w-56 rounded-lg" />}>
+            <GroupSelect
+              value={group ?? "all"}
+              ariaLabel="Filter deals by component group"
+              options={[
+                { value: "all", label: "All groups" },
+                ...CATEGORY_LIST.map((definition) => ({
+                  value: definition.category,
+                  label: definition.label,
+                })),
+              ]}
+            />
+          </Suspense>
+
+          <TabLinks items={tabLinks} active={tab} ariaLabel="Deal categories" />
+        </div>
 
         {deals.length === 0 ? (
           <EmptyState
             icon={<Tag />}
-            title={EMPTY_COPY[tab].title}
+            title={groupLabel ? `No ${groupLabel} deals right now` : EMPTY_COPY[tab].title}
             description={EMPTY_COPY[tab].description}
           />
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {deals.map((row) => (
-                <DealCard key={row.product_id} row={row} />
+                // The same product id can exist in two groups, so both are needed.
+                <DealCard key={`${row.category}-${row.product_id}`} row={row} />
               ))}
             </div>
             <p className="text-center text-xs text-muted-foreground">
-              Showing the top {deals.length} by percentage reduction from the starting price.
+              Showing the top {deals.length} {groupLabel ? `${groupLabel} ` : ""}by percentage
+              reduction from the recorded starting price.
             </p>
           </>
         )}

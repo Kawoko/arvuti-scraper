@@ -5,13 +5,16 @@ import type { ProductPriceSummaryRow } from "@/types/database";
 
 /** Rebuild a `ProductSpecs` object from a summary row so shared formatters can be reused. */
 export function productSpecsFromRow(row: ProductPriceSummaryRow): ProductSpecs {
+  // `?? null` matters: if a column is missing from the view, PostgREST omits the
+  // key entirely, so it arrives as `undefined`. Downstream checks test for null,
+  // and `undefined` would slip past them and render as an empty spec.
   return {
-    chipset: row.chipset,
-    family: row.family,
-    socket: row.socket,
-    readSpeedMbs: row.read_speed_mbs,
-    writeSpeedMbs: row.write_speed_mbs,
-    interfaceType: row.interface_type,
+    chipset: row.chipset ?? null,
+    family: row.family ?? null,
+    socket: row.socket ?? null,
+    readSpeedMbs: row.read_speed_mbs ?? null,
+    writeSpeedMbs: row.write_speed_mbs ?? null,
+    interfaceType: row.interface_type ?? null,
     memoryType: row.memory_type,
     capacityGb: row.capacity_gb,
     speedMhz: row.speed_mhz,

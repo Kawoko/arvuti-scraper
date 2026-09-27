@@ -10,11 +10,28 @@ export default function NotFound() {
       <EmptyState
         icon={<PackageSearch />}
         title="Product not found"
-        description="This product is not tracked, or the link is incorrect. It may have been delisted by the retailer."
+        description="This product is not tracked in this group, or the link is incorrect. It may have been delisted by the retailer, or it may be tracked under a different group."
         action={
-          <Link href="/" className={buttonVariants({ variant: "outline" })}>
-            Back to all RAM
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Link href="/" className={buttonVariants({ variant: "outline" })}>
+              RAM
+            </Link>
+            <Link href="/gpu" className={buttonVariants({ variant: "outline" })}>
+              GPUs
+            </Link>
+            <Link href="/cpu" className={buttonVariants({ variant: "outline" })}>
+              CPUs
+            </Link>
+            <Link href="/hdd" className={buttonVariants({ variant: "outline" })}>
+              HDDs
+            </Link>
+            <Link href="/ssd" className={buttonVariants({ variant: "outline" })}>
+              SSDs
+            </Link>
+            <Link href="/custom" className={buttonVariants({ variant: "outline" })}>
+              Custom
+            </Link>
+          </div>
         }
       />
     </div>

@@ -15,6 +15,22 @@ export interface DashboardStats {
   staleDays: number | null;
 }
 
+/** Data freshness is global, so it is exposed separately for pages that only need it. */
+export interface DataFreshness {
+  lastSuccessfulScan: ScrapeRunRow | null;
+  staleDays: number | null;
+}
+
+export async function getDataFreshness(): Promise<DataFreshness> {
+  const lastSuccessfulScan = await getLastSuccessfulScrapeRun();
+  const today = getTallinnDate();
+
+  return {
+    lastSuccessfulScan,
+    staleDays: lastSuccessfulScan ? daysBetween(lastSuccessfulScan.scrape_date, today) : null,
+  };
+}
+
 function countResult(
   result: { count: number | null; error: { message: string } | null },
   label: string,
@@ -33,25 +49,19 @@ export async function getDashboardStats(
       .select("product_id", { count: "exact", head: true })
       .eq("category", category);
 
-  const [tracked, drops, belowStart, newLows, lastSuccessfulScan] = await Promise.all([
+  const [tracked, drops, belowStart, newLows, freshness] = await Promise.all([
     base(),
     base().lt("day_change", 0),
     base().eq("is_below_start_price", true),
     base().eq("is_at_historical_low", true).gt("observation_count", 1),
-    getLastSuccessfulScrapeRun(),
+    getDataFreshness(),
   ]);
-
-  const today = getTallinnDate();
-  const staleDays = lastSuccessfulScan
-    ? daysBetween(lastSuccessfulScan.scrape_date, today)
-    : null;
 
   return {
     productsTracked: countResult(tracked, "tracked products"),
     dropsToday: countResult(drops, "today's price drops"),
     belowStartPrice: countResult(belowStart, "products below their starting price"),
     newHistoricalLows: countResult(newLows, "new historical lows"),
-    lastSuccessfulScan,
-    staleDays,
+    ...freshness,
   };
 }

@@ -1,3 +1,6 @@
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { buildProductsUrl } from "@/lib/arvutitark/client";
@@ -237,6 +240,46 @@ describe("request building for the new groups", () => {
     // Sending them would exclude the very products being pinned.
     expect(url).not.toContain("attributes=");
     expect(url).not.toContain("categories=");
+  });
+});
+
+describe("product links stay inside their own group", () => {
+  /** Every file that renders a link to a product detail page. */
+  function sourceFiles(): string[] {
+    const out: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of readdirSync(dir)) {
+        if (entry === "node_modules" || entry.startsWith(".")) continue;
+        const full = join(dir, entry);
+        if (statSync(full).isDirectory()) {
+          walk(full);
+          continue;
+        }
+        if (full.endsWith(".ts") || full.endsWith(".tsx")) out.push(full);
+      }
+    };
+
+    for (const dir of ["app", "components", "lib"]) walk(dir);
+    return out;
+  }
+
+  it("never hardcodes a /ram/ detail path", () => {
+    // Regression guard: a hardcoded `/ram/${id}` link sent every SSD, HDD, CPU
+    // and GPU deal to /ram/<id>, where the lookup is scoped to the RAM group and
+    // therefore found nothing. Detail links must go through productDetailHref.
+    const offenders = sourceFiles().filter((file) =>
+      readFileSync(file, "utf8").includes("/ram/"),
+    );
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("routes a non-RAM product id to its own group", () => {
+    // The same numeric id means a different product in a different group.
+    expect(productDetailHref("ssd", 1420998)).not.toContain("/ram/");
+    expect(productDetailHref("hdd", 1210237)).not.toContain("/ram/");
+    expect(productDetailHref("cpu", 1375186)).not.toContain("/ram/");
+    expect(productDetailHref("gpu", 1527001)).not.toContain("/ram/");
   });
 });
 
