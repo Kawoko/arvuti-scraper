@@ -6,6 +6,7 @@ import { CATEGORY_DEFINITIONS, isComponentCategory, productDetailHref } from "@/
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
 import { trackedKey } from "@/lib/tracking";
+import { cn } from "@/lib/utils";
 import type { ProductPriceSummaryRow } from "@/types/database";
 
 import { FavoriteButton } from "./favorite-button";
@@ -25,7 +26,7 @@ export function DealCard({ row, trackedKeys, authenticated, loginNext }: DealCar
   const group = isComponentCategory(row.category) ? CATEGORY_DEFINITIONS[row.category] : null;
 
   return (
-    <div className="surface flex flex-col gap-4 p-5">
+    <div className={cn("surface flex flex-col gap-4 p-5", row.is_delisted && "opacity-60")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           <div className="flex items-center gap-2">

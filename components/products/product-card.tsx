@@ -5,6 +5,7 @@ import { productDetailHref } from "@/lib/categories";
 import { EMPTY_VALUE, formatCurrency, formatDayMonth } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
 import { trackedKey } from "@/lib/tracking";
+import { cn } from "@/lib/utils";
 import type { ProductPriceSummaryRow } from "@/types/database";
 
 import { FavoriteButton } from "./favorite-button";
@@ -22,7 +23,7 @@ export function ProductCard({ row, trackedKeys, authenticated, loginNext }: Prod
   const specs = specSummaryFromRow(row);
 
   return (
-    <article className="surface relative p-4">
+    <article className={cn("surface relative p-4", row.is_delisted && "opacity-60")}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           {row.brand ? <p className="text-xs text-muted-foreground">{row.brand}</p> : null}

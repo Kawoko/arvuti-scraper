@@ -64,7 +64,10 @@ export function TrackedTable({
             const reached = percent !== null && percent <= -thresholdPercent;
 
             return (
-              <TableRow key={`${row.category}-${row.product_id}`}>
+              <TableRow
+                key={`${row.category}-${row.product_id}`}
+                className={row.is_delisted ? "opacity-60" : undefined}
+              >
                 <TableCell className="pl-5 pr-0">
                   <FavoriteButton
                     productId={row.product_id}
