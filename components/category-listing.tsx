@@ -9,7 +9,12 @@ import { StatStrip } from "@/components/products/stat-strip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CategoryDefinition } from "@/lib/categories";
-import { hasActiveFilters, parseProductFilters, type SearchParamsInput } from "@/lib/filters";
+import {
+  buildProductQuery,
+  hasActiveFilters,
+  parseProductFilters,
+  type SearchParamsInput,
+} from "@/lib/filters";
 import { getFilterFacetsCached, getProductList } from "@/lib/queries/products";
 import { getDashboardStats } from "@/lib/queries/stats";
 import { getTrackingContext } from "@/lib/queries/tracked";
@@ -36,6 +41,11 @@ export async function CategoryListing({ definition, searchParams }: CategoryList
   ]);
 
   const filtered = hasActiveFilters(filters);
+
+  // The browser holds its own row state for progressive loading. Remount it
+  // whenever the URL filter/sort contract changes, otherwise a sort click would
+  // update the URL while the table kept showing the previous ordering.
+  const browserKey = buildProductQuery(filters) || "default";
 
   return (
     <PageShell activePath={definition.path}>
@@ -69,6 +79,7 @@ export async function CategoryListing({ definition, searchParams }: CategoryList
           />
         ) : (
           <ProductBrowser
+            key={browserKey}
             category={definition.category}
             initialRows={list.rows}
             initialPage={list.page}

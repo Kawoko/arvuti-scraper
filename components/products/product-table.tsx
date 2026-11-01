@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { productDetailHref } from "@/lib/categories";
 import { buildSortHref, type ProductFilters, type SortColumn, type SortDirection } from "@/lib/filters";
-import { EMPTY_VALUE, formatCurrency, formatDayMonth } from "@/lib/format";
+import { EMPTY_VALUE, formatCurrency } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
 import { trackedKey } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
@@ -116,14 +116,7 @@ export function ProductTable({
             <SortableHeader column="start" label="Start" filters={filters} pathname={pathname} />
             <SortableHeader column="change" label="Change" filters={filters} pathname={pathname} />
             <SortableHeader column="lowest" label="Lowest" filters={filters} pathname={pathname} />
-            <TableHead className="pl-5">Stock</TableHead>
-            <SortableHeader
-              column="updated"
-              label="Last updated"
-              filters={filters}
-              pathname={pathname}
-              className="pr-5"
-            />
+            <TableHead className="pl-5 pr-5">Stock</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -183,12 +176,8 @@ export function ProductTable({
                   </span>
                 </TableCell>
 
-                <TableCell className="pl-5">
+                <TableCell className="pl-5 pr-5">
                   <StockBadge inStock={row.in_stock} delisted={row.is_delisted} />
-                </TableCell>
-
-                <TableCell className="pr-5 text-right text-xs text-muted-foreground">
-                  {formatDayMonth(row.current_observed_at)}
                 </TableCell>
               </TableRow>
             );
