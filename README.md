@@ -1,15 +1,18 @@
 # Arvutitark Price Tracker
 
 Historical price tracking for PC components at the Estonian retailer
-[Arvutitark](https://arvutitark.ee). It tracks six **independent groups**:
+[Arvutitark](https://arvutitark.ee). It tracks five **independent groups**:
 desktop DDR5 RAM, 16 GB current-generation graphics cards, current-generation
-CPUs, 1–5 TB hard drives, 3500+ MB/s SSDs, and a set of individually pinned
-products.
+CPUs, 1–5 TB hard drives, and 3500+ MB/s SSDs.
 
 Each group has its own filters, its own stored rows and its own reporting, so
 enabling or refreshing one can never overwrite another. Collection runs **twice a
 day**. Motherboards and PSUs can be added the same way without restructuring
 anything.
+
+Signed-in visitors can **star any product** and get their own tracked list across
+every group. Alert preferences (percentage drop, email and webhook choices) are
+saved per account; the delivery workers themselves are not implemented yet.
 
 The point of the project is a genuine **price history**. Arvutitark's own
 `original_price` field is not a history — it is whatever the shop currently
@@ -21,14 +24,14 @@ never overwrites those rows, so "is this actually cheap?" becomes answerable.
 ## Screenshots
 
 > _Placeholder — add screenshots of the RAM list, the product detail chart, the
-> deals page and the status page here._
+> deals page and the tracked page here._
 
 | Page | Description |
 | --- | --- |
-| `/` | Filterable RAM list with summary cards, dense desktop table and mobile cards |
+| `/` | Filterable RAM list with compact stats, dense desktop table and mobile cards |
 | `/ram/[id]` | Product detail with a daily price history chart and availability breakdown |
 | `/deals` | Products ranked by reduction from our own recorded starting price |
-| `/status` | Collection health: last attempt, last success, recent runs and failures |
+| `/tracked` | The signed-in user's starred products and alert preferences |
 
 ---
 
@@ -46,32 +49,34 @@ and navigation are generated from that registry.
 | CPUs | `/cpu` | `15` | `19[…families…];102[…sockets…]` + `brands=intel,amd` | Ryzen 5/7/9 (AM5) and Core Ultra 5/7/9 (LGA 1851) |
 | HDDs | `/hdd` | `137` | `25[1000﹑-﹑5000]` | 1–5 TB mechanical drives |
 | SSDs | `/ssd` | `139` | `23[864﹑-﹑31458];185[3500﹑-﹑14900];186[3500﹑-﹑14000]` | 3500+ MB/s read and write |
-| Custom | `/custom` | *(none)* | *(none — pinned by product id)* | 3 individually pinned products |
 
-### Custom pinned items
+The former hard-coded **Custom** group has been removed. `/custom` and
+`/custom/[id]` now redirect to `/tracked` so old bookmarks keep working.
 
-The `custom` group tracks specific products by id rather than by a filter, so a
-pinned product stays tracked even if it falls outside a category's filters (a GPU
-dropped from the chipset whitelist, a drive outside the speed band). The pinned
-ids live in [`lib/custom-items.ts`](lib/custom-items.ts:1):
+### User tracking
 
-| Product id | Item |
-| --- | --- |
-| `1436318` | ASRock Radeon RX 9070 Challenger 16GB |
-| `1183913` | G.Skill Ripjaws S5 32GB DDR5-6000 CL30 |
-| `1392056` | Lexar NQ790 2TB NVMe SSD |
+Every product row and detail page carries a star. Starring a product inserts one
+row into `public.tracked_products` for the signed-in user, keyed by
+`(user_id, product_id, category)`. The current price at that moment is recorded as
+`price_at_tracking`, which lets `/tracked` show how far the price has moved since
+the user started following it.
 
-All three are fetched in **one** request using the endpoint's comma-separated
-`ids` parameter (verified against the live API), with the category and attribute
-filters deliberately omitted — sending them would exclude the very products being
-pinned.
+`/tracked` also stores alert preferences in `public.notification_settings`:
 
-**Independent storage.** Products and price history are keyed by
-`(product id, category)`, not by product id alone. A product pinned as a custom
-item therefore gets its own row and its own price history, and cannot overwrite
-the same product tracked under `gpu` — or vice versa. The pinned ASRock RX 9070
-above is deliberately an example of exactly this: it also matches the GPU
-filter, so it legitimately exists in both groups with separate histories.
+- minimum drop percentage (default 10%)
+- email on/off and address (kept for later);
+- generic webhook on/off and URL;
+- Discord webhook URL.
+
+**Nothing is delivered yet.** The preferences are written so the email and
+webhook workers can be added later without a schema change. The schema and RLS
+policies are in
+[`20260921000007_user_tracking.sql`](supabase/migrations/20260921000007_user_tracking.sql:1).
+
+**Authentication.** Login is passwordless: a Supabase magic link is emailed, then
+exchanged for a cookie session in `/auth/callback`. Middleware refreshes the
+session before each request. The signed-in user only ever sees their own rows,
+enforced by RLS rather than by application code.
 
 ### Deals per group
 
@@ -116,6 +121,7 @@ spaces or `™` only matches when it is byte-identical. Verify it with
 | Validation | Zod |
 | Database | PostgreSQL via Supabase |
 | Client | `@supabase/supabase-js` |
+| Auth | Supabase Auth magic links + `@supabase/ssr` cookie sessions |
 | Scraper runtime | Node.js `fetch` + `tsx` |
 | Tests | Vitest |
 | Quality | ESLint + Prettier |
@@ -132,19 +138,24 @@ app/
   layout.tsx                 Root layout, theme provider
   page.tsx                   RAM price list (main page, at /)
   ram/page.tsx               Alias -> /
-  [category]/page.tsx        Listing for /gpu, /cpu, /hdd, /ssd, /custom
+  [category]/page.tsx        Listing for /gpu, /cpu, /hdd, /ssd
   [category]/[id]/page.tsx   Product detail + history chart, any group
   deals/page.tsx             Deals, URL-driven tabs
-  status/page.tsx            Collection status
+  tracked/page.tsx           Signed-in user's starred products + alerts
+  login/page.tsx             Magic-link sign in
+  auth/callback/route.ts     Exchanges the magic-link code for a session
+  api/products/route.ts      One batch of rows for progressive loading
+  custom/                    Redirects the removed group to /tracked
   error.tsx / not-found.tsx  Error and empty boundaries
   */loading.tsx              Skeleton loading states
 
 components/
+  auth/                      Login form, sign-out button
   charts/                    Recharts price history chart (client)
-  filters/                   Filter toolbar, pagination, URL tab links
+  filters/                   Filter toolbar and URL tab links
   layout/                    Header, footer, theme provider/toggle, page shell
-  products/                  Table, card, list, stats, spec list, deal card
-  status/                    Scrape status badge
+  products/                  Table, cards, stars, stat strip, progressive browser
+  tracked/                   Tracked table, alert preferences form
   ui/                        Button, Card, Input, Badge, Select, Table, Skeleton…
 
 lib/
@@ -154,18 +165,23 @@ lib/
     normalize.ts             Spec parsing + product normalization per category
     types.ts                 Raw + normalized types
     validation.ts            Zod schema for the ingest payload
+  auth.ts                    Safe post-login redirect helper
+  browser-cache.ts           localStorage cache for loaded product batches
   categories.ts              Group registry driving scraper, queries, routes and UI
-  custom-items.ts            The individually pinned products for the custom group
   product-page.ts            Shared product-detail loaders and metadata
-  queries/                   Read layer for the summary view and scrape runs
+  queries/                   Read layer, including per-user tracked items
   scraper/run.ts             Scrape orchestration + daily-claim guarantee
+  supabase/auth-server.ts    Cookie-aware Supabase client for user data
+  supabase/middleware.ts     Session refresh helper
   supabase/admin.ts          Privileged client (server-side only)
   supabase/server.ts         Read-only client for Server Components
   dates.ts                   Europe/Tallinn calendar helpers
   filters.ts                 URL filter contract
   format.ts / price.ts       Formatting and percentage maths
   presentation.ts            Row -> view-model helpers
+  tracking.ts                Composite (category, product id) key
 
+middleware.ts                Refreshes the auth session on every request
 scripts/scrape.ts            Runnable scraper entry point
 supabase/migrations/         SQL schema, functions and views
 tests/                       Vitest suites + JSON fixtures
@@ -193,7 +209,7 @@ npm run start        # serve the production build
 npm run lint         # ESLint
 npm run typecheck    # tsc --noEmit
 npm run format       # Prettier write
-npm run test         # Vitest (63 tests)
+npm run test         # Vitest (167 tests)
 npm run scrape       # run the scraper once (respects the daily claim)
 npm run scrape:url   # print the exact API request without contacting Arvutitark
 ```
@@ -207,13 +223,14 @@ npm run scrape:url   # print the exact API request without contacting Arvutitark
 | `NEXT_PUBLIC_SUPABASE_URL` | public | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | public | Read-only (RLS) access from the server |
 | `SUPABASE_SECRET_KEY` | **secret** | Service role; bypasses RLS. Server-side only |
+| `NEXT_PUBLIC_SITE_URL` | public | Optional canonical origin for magic links, e.g. `https://tracker.example.com`. Defaults to the request host in development |
 | `ARVUTITARK_BASE_URL` | server | Products endpoint (defaults to `https://cms.arvutitark.ee/api/products`) |
 | `ARVUTITARK_REQUEST_TIMEOUT_MS` | server | Per-request timeout, default `20000` |
 | `ARVUTITARK_PAGE_DELAY_MS` | server | Politeness delay between pages, default `750` |
 | `ARVUTITARK_MAX_PAGES` | server | Safety ceiling, default `50` |
 | `SCRAPER_DEBUG` | server | `true` for verbose request/response logging. Never logs secrets |
 | `ARVUTITARK_GPU_ATTRIBUTES` | server | Overrides the graphics card filter. Set to `15[16]` to drop the chipset whitelist if it ever stops matching |
-| `SCRAPER_GROUPS` | server | Comma-separated groups to collect. Defaults to all six. Useful for exercising one group in isolation, e.g. `SCRAPER_GROUPS=cpu` |
+| `SCRAPER_GROUPS` | server | Comma-separated groups to collect. Defaults to all five. Useful for exercising one group in isolation, e.g. `SCRAPER_GROUPS=cpu` |
 
 `.env.local` is gitignored. `.env.example` contains placeholders only.
 
@@ -238,6 +255,10 @@ Open the SQL editor and run, in order:
 1. `supabase/migrations/20260921000001_init.sql`
 2. `supabase/migrations/20260921000002_functions.sql`
 3. `supabase/migrations/20260921000003_views.sql`
+4. `supabase/migrations/20260921000004_groups_and_slots.sql`
+5. `supabase/migrations/20260921000005_grouped_summary_view.sql`
+6. `supabase/migrations/20260921000006_availability.sql`
+7. `supabase/migrations/20260921000007_user_tracking.sql`
 
 **Option B — Supabase CLI:**
 
@@ -246,12 +267,22 @@ supabase link --project-ref <your-project-ref>
 supabase db push
 ```
 
-> **Applying the group and twice-daily changes.** Run
+> **Applying the group, twice-daily, availability and user-tracking changes.** Run
 > `20260921000004_groups_and_slots.sql` (second daily slot, per-category spec
-> columns, and the composite `(id, category)` identity) and then
+> columns, and the composite `(id, category)` identity), then
 > `20260921000005_grouped_summary_view.sql` (rebuilds the summary view on that
-> identity). `0005` **must run last**. Every migration is additive and safe to
-> re-run, and `0004` prints a notice if it cannot build a uniqueness guarantee.
+> identity), then `20260921000006_availability.sql` (adds `latest_scrape_date`,
+> `last_seen_date` and `is_delisted` to the view), then
+> `20260921000007_user_tracking.sql` (starred products, alert preferences and the
+> `tracked_product_details` view). Run them **in that order** — `0007` must run
+> last. Every migration is additive and safe to re-run, and `0004` prints a notice
+> if it cannot build a uniqueness guarantee.
+>
+> **Auth is required for `/tracked`.** In the Supabase dashboard, enable
+> **Authentication → Providers → Email**, and add
+> `http://localhost:3000/auth/callback` (plus your production
+> `https://…/auth/callback`) to **Authentication → URL Configuration → Redirect
+> URLs**. Magic links sent to an unlisted redirect URL are rejected by Supabase.
 
 ### What the migrations create
 
@@ -282,11 +313,32 @@ product metadata and inserts the day's observations with `on conflict … do
 nothing`. History is never rewritten.
 
 **`product_price_summary`** (view) — per-product derived statistics used by the
-list, deals and status pages: `start_date`, `start_price`, `current_date`,
+list and deals pages: `start_date`, `start_price`, `current_date`,
 `current_price`, `price_change`, `price_change_percent`, `lowest_price`,
 `highest_price`, `average_price`, `previous_*` and `day_change*` for today's
 movement, current stock, and the `is_below_start_price` / `is_above_start_price` /
 `is_at_historical_low` flags.
+
+It also exposes the availability fields added by `20260921000006`:
+`latest_scrape_date` (the most recent completed run), `last_seen_date` (the last
+collection that actually returned the product) and `is_delisted` (true when the
+retailer stopped returning it). A delisted product is **flagged, never deleted**,
+so its history survives and it becomes active again if Arvutitark relists it.
+Delisted products are also forced out of `in_stock`, because their stock figures
+are frozen at the last collection that saw them.
+
+**`tracked_products`** — one row per `(user_id, product_id, category)`, plus
+`price_at_tracking` and `created_at`. `20260921000007` enables RLS with
+select/insert/update/delete policies that all require `auth.uid() = user_id`.
+
+**`notification_settings`** — one row per user with
+`price_drop_percent`, `email_enabled`, `email_address`, `webhook_enabled`,
+`webhook_url` and `discord_webhook_url`. Same per-user RLS.
+
+**`tracked_product_details`** (view) — `tracked_product_details` joins the
+caller's tracked rows to the live price summary. It is declared
+`security_invoker = true`, so the base-table RLS applies and one user can never
+read another user's favourites.
 
 > **Terminology.** `start_price` is the price at the *earliest observation in our
 > own database*. `original_price` is Arvutitark's own field. They are different
@@ -294,12 +346,19 @@ movement, current stock, and the `is_below_start_price` / `is_above_start_price`
 
 ### Security model
 
-- RLS is enabled on all three tables with **select-only** policies for `anon` and
-  `authenticated`. The browser/user-facing key cannot write anything.
-- All writes go through `security definer` functions whose `execute` privilege is
-  revoked from `public`/`anon`/`authenticated` and granted only to `service_role`.
-- The app reads through Server Components (`lib/supabase/server.ts`), so the read
-  key never leaves the server either.
+- The catalogue tables (`products`, `price_history`, `scrape_runs`) keep
+  **select-only** policies for `anon` and `authenticated`; the user-facing key
+  cannot write catalogue data.
+- Catalogue writes go through `security definer` functions whose `execute`
+  privilege is revoked from `public`/`anon`/`authenticated` and granted only to
+  `service_role`.
+- `tracked_products` and `notification_settings` are writable by `authenticated`,
+  but every policy pins the row to `auth.uid()`. The client can only touch its own
+  data.
+- The app reads public catalogue data through Server Components and per-user data
+  through a cookie-aware Supabase client, so keys never leave the server.
+- Magic-link sessions are stored in `httpOnly` cookies and refreshed by
+  `middleware.ts`.
 
 ---
 
@@ -391,7 +450,11 @@ COMMA, not an ASCII comma. An ASCII comma makes the API match nothing and return
 an empty result set. The command exits non-zero if an ASCII comma is detected.
 
 No shop availability filter is ever sent, so out-of-stock products are still
-tracked.
+tracked, and a product that disappears from the shop keeps its last price and
+history rather than being deleted. The list page's **Availability** selector can
+narrow to `In stock only`, `Out of stock`, or `No longer listed`; delisted
+products show a distinct "No longer listed" badge on the table, cards and detail
+page.
 
 ### Verbose logging
 
@@ -586,9 +649,11 @@ Cron hitting a route handler) is compatible.
 **Frontend (Vercel):**
 
 1. Import the repository into Vercel.
-2. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and
-   `SUPABASE_SECRET_KEY` as environment variables.
-3. Deploy. All data pages are rendered dynamically on the server, so no build-time
+2. Set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
+   `SUPABASE_SECRET_KEY` and (for stable magic-link URLs) `NEXT_PUBLIC_SITE_URL`
+   as environment variables.
+3. Add the deployment's `/auth/callback` URL to Supabase Auth → URL Configuration.
+4. Deploy. All data pages are rendered dynamically on the server, so no build-time
    database access is required.
 
 **Error boundaries:** `app/error.tsx` shows a generic message and a retry button.
@@ -596,19 +661,28 @@ Stack traces, database details and credentials are never rendered.
 
 ---
 
-## Performance notes
+## Performance and caching
 
-- The list, deals and status pages read only `product_price_summary`, never the
-  full history.
+- The list and deals pages read only `product_price_summary`, never the full
+  history.
 - Full `price_history` is queried **only** on a product detail page, and only for
   that one product.
-- The list is paginated (24 per page) with a stable secondary sort so pages never
-  repeat or skip rows.
-- Indexes cover `(product_id, observed_date)`, `observed_date`, and the product
-  facet columns used by filters.
-- Filter option lists are derived from the summary view's facet columns, which is
-  appropriate at this catalogue size (hundreds of rows).
-- Server Components mean only rendered data crosses to the browser.
+- Filter option lists (the catalogue metadata) are cached server-side for five
+  minutes with `unstable_cache`; prices are never cached there.
+- The first listing page is server-rendered. Further pages arrive in batches of
+  24 through `/api/products` when the visitor scrolls near the end, or on demand.
+  At most two batches load automatically per visit; the rest is an explicit
+  "Load more", so a fast connection never pulls the whole catalogue in one go.
+- Each loaded batch is stored in `localStorage`
+  (`lib/browser-cache.ts`, ten-minute TTL, capped at 12 pages). Returning to the
+  same view reuses those rows instantly and marks the list as partly cached;
+  prices still revalidate from the API on the next batch request.
+- The Next.js router cache keeps visited pages for 30 seconds
+  (`experimental.staleTimes` in `next.config.ts`).
+- Indexes cover `(product_id, observed_date)`, `observed_date`, the product facet
+  columns used by filters, and `tracked_products (user_id, created_at desc)`.
+- Server Components mean only rendered data crosses to the browser. The
+  per-user star query returns only `(product_id, category)` pairs.
 
 ---
 
@@ -624,6 +698,7 @@ Coverage includes:
   `"2 x 16 GB"`, `"UDIMM"` vs `"SODIMM"`, voltage, and bare-number attributes.
 - **Tallinn date calculation** — summer/winter offsets and the UTC midnight boundary.
 - **Product normalization** — ID coercion, URL building, stock maps, null-not-invented specs.
+- **Group criteria** — RAM/GPU filtering and the strict declared-category check.
 - **Price percentage calculation** — decreases, increases, unchanged, and null cases.
 - **Duplicate product handling** — dedupe by retailer id across pages.
 - **Pagination** — following `last_page`, page ceilings, empty pages, HTTP failures,
@@ -647,7 +722,10 @@ Fixtures live in `tests/fixtures/` so no test ever touches the live Arvutitark A
 | `Missing NEXT_PUBLIC_SUPABASE_URL` | Env not loaded | Ensure `.env.local` exists; the scraper loads it via `dotenv` |
 | `Could not claim the daily scrape slot` | Supabase unreachable or bad key | Check the project URL and `SUPABASE_SECRET_KEY`; no retailer traffic is sent while this fails |
 | Status page shows `permission denied for function` | Migrations not fully applied | Re-run `0002_functions.sql` (the `grant execute … to service_role` statements) |
-| List page is empty but the status page shows a successful run | View not created | Re-run `0003_views.sql` |
+| List page is empty although a scrape succeeded | View not created | Re-run `0003_views.sql` (and `0005`/`0006` if upgrading) |
+| `/tracked` fails with `relation "tracked_products" does not exist` | User-tracking migration not applied | Run `20260921000007_user_tracking.sql` in the Supabase SQL editor |
+| Magic link opens `/login?error=…` | Redirect URL not allow-listed, or the link expired | Add `/auth/callback` to Supabase Auth → URL Configuration → Redirect URLs, then request a new link |
+| Magic link email never arrives | Email provider disabled or rate-limited | Enable the Email provider in Supabase; check Auth logs. The UI reports rate limits explicitly |
 | Run is stuck on `running` | Process was killed after claiming | Expected and safe — the day stays claimed. Inspect the row, or clear it manually if you really need to recollect |
 | `Arvutitark responded with HTTP 503` | Retailer outage | Nothing to do; the run is marked failed and will resume tomorrow |
 | Chart shows a single point | Only one day of history exists so far | Wait for more daily runs |
@@ -660,16 +738,20 @@ duplicate history) and you have no data worth keeping, reset them instead:
 
 ```sql
 -- DESTRUCTIVE: drops all collected price history and product metadata.
+drop view  if exists public.tracked_product_details;
 drop view  if exists public.product_price_summary;
-drop table if exists public.price_history cascade;
-drop table if exists public.products      cascade;
-drop table if exists public.scrape_runs   cascade;
+drop table if exists public.notification_settings cascade;
+drop table if exists public.tracked_products     cascade;
+drop table if exists public.price_history       cascade;
+drop table if exists public.products            cascade;
+drop table if exists public.scrape_runs         cascade;
 drop function if exists public.claim_scrape_run(date);
 drop function if exists public.finish_scrape_run(date, text, integer, integer, text);
 drop function if exists public.ingest_snapshot(date, jsonb);
+drop function if exists public.touch_updated_at();
 ```
 
-Then re-run the three migrations in order. Inspect the legacy shape first if you
+Then re-run all seven migrations in order. Inspect the legacy shape first if you
 are unsure whether it is worth keeping:
 
 ```sql
@@ -706,12 +788,13 @@ group by 1, 2 having count(*) > 1;
   `process.env.SUPABASE_SECRET_KEY`, is never prefixed with `NEXT_PUBLIC_`, and is
   never imported by a Client Component.
 - `lib/supabase/admin.ts` is the only module that uses the secret key, and it is
-  imported exclusively from the scraper script. Server Components read through the
-  publishable key.
+  imported exclusively from the scraper script. Server Components and all user
+  requests read through the publishable key.
 - `.env.local` and all `.env*` variants are gitignored; `.env.example` holds
   placeholders only.
-- All privileged writes are `security definer` functions granted to `service_role`
-  alone. `anon`/`authenticated` hold select-only policies.
+- Catalogue writes use `security definer` functions granted to `service_role`
+  alone. User data tables are writable by `authenticated`, but each policy requires
+  `auth.uid() = user_id`.
 - Users are never shown stack traces, database credentials, environment values or
   raw error objects — only short, sanitised messages.
 - **Rotate any credentials that were exposed during development.** If a secret key

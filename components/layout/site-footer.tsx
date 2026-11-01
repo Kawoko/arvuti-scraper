@@ -5,7 +5,7 @@ export function SiteFooter() {
     <footer className="mt-16 border-t border-border">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-2 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <p>
-          Price history collected once per day from{" "}
+          Data from{" "}
           <a
             href="https://arvutitark.ee"
             target="_blank"
@@ -17,11 +17,11 @@ export function SiteFooter() {
           . Not affiliated with Arvutitark.
         </p>
         <div className="flex items-center gap-4">
-          <Link href="/status" className="transition-colors duration-150 hover:text-foreground">
-            Data status
-          </Link>
           <Link href="/deals" className="transition-colors duration-150 hover:text-foreground">
             Deals
+          </Link>
+          <Link href="/tracked" className="transition-colors duration-150 hover:text-foreground">
+            Tracked
           </Link>
         </div>
       </div>

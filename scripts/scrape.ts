@@ -13,7 +13,6 @@ loadEnv();
 import { fetchAllProducts } from "@/lib/arvutitark/client";
 import { getScraperConfig } from "@/lib/arvutitark/config";
 import { CATEGORY_LIST } from "@/lib/categories";
-import { customItemsIdFilter } from "@/lib/custom-items";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { consoleScrapeLogger, runScrape, type ScrapeRpcClient, type ScrapeTarget } from "@/lib/scraper/run";
 
@@ -68,26 +67,13 @@ async function main(): Promise<void> {
 
   const targets: ScrapeTarget[] = CATEGORY_LIST.filter((definition) =>
     enabled.has(definition.category),
-  ).map((definition) => {
-    // The pinned group is fetched by product id, so it deliberately carries no
-    // category or attribute filter — sending them would exclude these products.
-    if (definition.category === "custom") {
-      return {
-        category: definition.category,
-        categoryId: null,
-        attributes: null,
-        ids: customItemsIdFilter(),
-      };
-    }
-
-    return {
-      category: definition.category,
-      categoryId: definition.arvutitarkCategoryId,
-      // Built-in filter, with a documented env override for graphics cards.
-      attributes: definition.category === "gpu" ? config.gpuAttributes : definition.attributes,
-      brands: definition.brands,
-    };
-  });
+  ).map((definition) => ({
+    category: definition.category,
+    categoryId: definition.arvutitarkCategoryId,
+    // Built-in filter, with a documented env override for graphics cards.
+    attributes: definition.category === "gpu" ? config.gpuAttributes : definition.attributes,
+    brands: definition.brands,
+  }));
 
   consoleScrapeLogger.info(
     `Tracking ${targets.length} group(s): ${targets.map((t) => t.category).join(", ")}`,

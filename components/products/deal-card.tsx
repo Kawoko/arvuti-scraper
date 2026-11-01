@@ -5,11 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { CATEGORY_DEFINITIONS, isComponentCategory, productDetailHref } from "@/lib/categories";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
+import { trackedKey } from "@/lib/tracking";
 import type { ProductPriceSummaryRow } from "@/types/database";
 
+import { FavoriteButton } from "./favorite-button";
 import { StockBadge } from "./stock-badge";
 
-export function DealCard({ row }: { row: ProductPriceSummaryRow }) {
+interface DealCardProps {
+  row: ProductPriceSummaryRow;
+  trackedKeys: ReadonlySet<string>;
+  authenticated: boolean;
+  loginNext: string;
+}
+
+export function DealCard({ row, trackedKeys, authenticated, loginNext }: DealCardProps) {
   const specs = specSummaryFromRow(row);
   const percent = row.price_change_percent;
   const savings = row.price_change === null ? null : Math.abs(row.price_change);
@@ -35,6 +44,13 @@ export function DealCard({ row }: { row: ProductPriceSummaryRow }) {
           <p className="text-xs text-muted-foreground">{specs}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <FavoriteButton
+            productId={row.product_id}
+            category={row.category}
+            initialTracked={trackedKeys.has(trackedKey(row.category, row.product_id))}
+            authenticated={authenticated}
+            loginNext={loginNext}
+          />
           {percent !== null && percent < 0 ? (
             <Badge variant="positive">
               <ArrowDownRight />

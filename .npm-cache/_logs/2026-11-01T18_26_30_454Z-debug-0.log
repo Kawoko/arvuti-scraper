@@ -1,0 +1,730 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.6.1
+2 info using node@v24.11.0
+3 silly config load:file:C:\Users\Onoca\AppData\Roaming\nvm\v24.11.0\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\Onoca\Desktop\Arvutitark Scraper\.npmrc
+5 silly config load:file:C:\Users\Onoca\.npmrc
+6 silly config load:file:C:\Program Files\nodejs\etc\npmrc
+7 verbose title npm install @supabase/ssr@^0.12.0
+8 verbose argv "install" "@supabase/ssr@^0.12.0" "--cache" "C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\.npm-cache" "--no-audit" "--no-fund"
+9 verbose logfile logs-max:10 dir:C:\Users\Onoca\Desktop\Arvutitark Scraper\.npm-cache\_logs\2026-11-01T18_26_30_454Z-
+10 verbose logfile C:\Users\Onoca\Desktop\Arvutitark Scraper\.npm-cache\_logs\2026-11-01T18_26_30_454Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules
+14 silly idealTree buildDeps
+15 silly fetch manifest @supabase/ssr@^0.12.0
+16 silly packumentCache full:https://registry.npmjs.org/@supabase%2fssr cache-miss
+17 http cache https://registry.npmjs.org/@supabase%2fssr 24ms (cache hit)
+18 silly packumentCache full:https://registry.npmjs.org/@supabase%2fssr set size:261164 disposed:false
+19 silly fetch manifest @supabase/supabase-js@^2.49.1
+20 silly packumentCache full:https://registry.npmjs.org/@supabase%2fsupabase-js cache-miss
+21 http fetch GET 200 https://registry.npmjs.org/@supabase%2fsupabase-js 1389ms (cache miss)
+22 silly packumentCache full:https://registry.npmjs.org/@supabase%2fsupabase-js set size:undefined disposed:false
+23 silly fetch manifest @opentelemetry/api@>=1.0.0
+24 silly packumentCache full:https://registry.npmjs.org/@opentelemetry%2fapi cache-miss
+25 http fetch GET 200 https://registry.npmjs.org/@opentelemetry%2fapi 61ms (cache miss)
+26 silly packumentCache full:https://registry.npmjs.org/@opentelemetry%2fapi set size:undefined disposed:false
+27 silly placeDep ROOT @supabase/ssr@0.12.7 OK for: arvutitark-price-tracker@1.0.0 want: ^0.12.0
+28 silly fetch manifest cookie@^1.0.2
+29 silly packumentCache full:https://registry.npmjs.org/cookie cache-miss
+30 http fetch GET 200 https://registry.npmjs.org/cookie 44ms (cache miss)
+31 silly packumentCache full:https://registry.npmjs.org/cookie set size:undefined disposed:false
+32 silly fetch manifest @emnapi/runtime@^1.11.3
+33 silly packumentCache full:https://registry.npmjs.org/@emnapi%2fruntime cache-miss
+34 http fetch GET 200 https://registry.npmjs.org/@emnapi%2fruntime 101ms (cache miss)
+35 silly packumentCache full:https://registry.npmjs.org/@emnapi%2fruntime set size:undefined disposed:false
+36 silly placeDep ROOT @emnapi/runtime@1.11.3 OK for: @img/sharp-wasm32@0.35.4 want: ^1.11.3
+37 silly fetch manifest @emnapi/core@^1.7.1 || ^2.0.0-alpha.4
+38 silly packumentCache full:https://registry.npmjs.org/@emnapi%2fcore cache-miss
+39 http fetch GET 200 https://registry.npmjs.org/@emnapi%2fcore 227ms (cache miss)
+40 silly packumentCache full:https://registry.npmjs.org/@emnapi%2fcore set size:undefined disposed:false
+41 silly placeDep ROOT @emnapi/core@1.11.3 OK for: @napi-rs/wasm-runtime@1.2.4 want: ^1.7.1 || ^2.0.0-alpha.4
+42 silly placeDep ROOT cookie@1.1.1 OK for: @supabase/ssr@0.12.7 want: ^1.0.2
+43 silly reify mark retired [
+43 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-wasm32-wasi'
+43 silly reify ]
+44 silly reify moves {
+44 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-wasm32-wasi': 'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\.resolver-binding-wasm32-wasi-U28I81Qo'
+44 silly reify }
+45 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-wasm32-wasi
+46 silly reify mark deleted [
+46 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-wasm32-wasi'
+46 silly reify ]
+47 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-wasm32-wasi\node_modules\@emnapi\wasi-threads
+48 silly reify mark deleted [
+48 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-wasm32-wasi\\node_modules\\@emnapi\\wasi-threads'
+48 silly reify ]
+49 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-wasm32-wasi\node_modules\@napi-rs\wasm-runtime
+50 silly reify mark deleted [
+50 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-wasm32-wasi\\node_modules\\@napi-rs\\wasm-runtime'
+50 silly reify ]
+51 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-wasm32-wasi\node_modules\@tybys\wasm-util
+52 silly reify mark deleted [
+52 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-wasm32-wasi\\node_modules\\@tybys\\wasm-util'
+52 silly reify ]
+53 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-wasm32-wasi\node_modules\tslib
+54 silly reify mark deleted [
+54 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-wasm32-wasi\\node_modules\\tslib'
+54 silly reify ]
+55 silly reify mark deleted [
+55 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@emnapi\\wasi-threads'
+55 silly reify ]
+56 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-win32-arm64-msvc
+57 silly reify mark deleted [
+57 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-win32-arm64-msvc'
+57 silly reify ]
+58 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-linux-x64-musl
+59 silly reify mark deleted [
+59 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-linux-x64-musl'
+59 silly reify ]
+60 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-linux-x64-gnu
+61 silly reify mark deleted [
+61 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-linux-x64-gnu'
+61 silly reify ]
+62 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-linux-arm64-musl
+63 silly reify mark deleted [
+63 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-linux-arm64-musl'
+63 silly reify ]
+64 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-linux-arm64-gnu
+65 silly reify mark deleted [
+65 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-linux-arm64-gnu'
+65 silly reify ]
+66 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-linux-arm-gnueabihf
+67 silly reify mark deleted [
+67 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-linux-arm-gnueabihf'
+67 silly reify ]
+68 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-freebsd-x64
+69 silly reify mark deleted [
+69 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-freebsd-x64'
+69 silly reify ]
+70 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-darwin-x64
+71 silly reify mark deleted [
+71 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-darwin-x64'
+71 silly reify ]
+72 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-darwin-arm64
+73 silly reify mark deleted [
+73 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-darwin-arm64'
+73 silly reify ]
+74 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\lightningcss-android-arm64
+75 silly reify mark deleted [
+75 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\lightningcss-android-arm64'
+75 silly reify ]
+76 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\fsevents
+77 silly reify mark deleted [
+77 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\fsevents'
+77 silly reify ]
+78 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-win32-ia32-msvc
+79 silly reify mark deleted [
+79 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-win32-ia32-msvc'
+79 silly reify ]
+80 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-win32-arm64-msvc
+81 silly reify mark deleted [
+81 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-win32-arm64-msvc'
+81 silly reify ]
+82 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-openharmony-arm64
+83 silly reify mark deleted [
+83 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-openharmony-arm64'
+83 silly reify ]
+84 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-x64-musl
+85 silly reify mark deleted [
+85 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-x64-musl'
+85 silly reify ]
+86 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-x64-gnu
+87 silly reify mark deleted [
+87 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-x64-gnu'
+87 silly reify ]
+88 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-s390x-gnu
+89 silly reify mark deleted [
+89 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-s390x-gnu'
+89 silly reify ]
+90 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-riscv64-musl
+91 silly reify mark deleted [
+91 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-riscv64-musl'
+91 silly reify ]
+92 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-riscv64-gnu
+93 silly reify mark deleted [
+93 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-riscv64-gnu'
+93 silly reify ]
+94 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-ppc64-gnu
+95 silly reify mark deleted [
+95 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-ppc64-gnu'
+95 silly reify ]
+96 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-loong64-musl
+97 silly reify mark deleted [
+97 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-loong64-musl'
+97 silly reify ]
+98 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-loong64-gnu
+99 silly reify mark deleted [
+99 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-loong64-gnu'
+99 silly reify ]
+100 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-arm64-musl
+101 silly reify mark deleted [
+101 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-arm64-musl'
+101 silly reify ]
+102 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-arm64-gnu
+103 silly reify mark deleted [
+103 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-arm64-gnu'
+103 silly reify ]
+104 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-arm-musleabihf
+105 silly reify mark deleted [
+105 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-arm-musleabihf'
+105 silly reify ]
+106 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-linux-arm-gnueabihf
+107 silly reify mark deleted [
+107 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-linux-arm-gnueabihf'
+107 silly reify ]
+108 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-freebsd-x64
+109 silly reify mark deleted [
+109 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-freebsd-x64'
+109 silly reify ]
+110 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-darwin-x64
+111 silly reify mark deleted [
+111 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-darwin-x64'
+111 silly reify ]
+112 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-darwin-arm64
+113 silly reify mark deleted [
+113 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-darwin-arm64'
+113 silly reify ]
+114 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-android-arm64
+115 silly reify mark deleted [
+115 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-android-arm64'
+115 silly reify ]
+116 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-android-arm-eabi
+117 silly reify mark deleted [
+117 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-android-arm-eabi'
+117 silly reify ]
+118 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-win32-arm64-msvc
+119 silly reify mark deleted [
+119 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-win32-arm64-msvc'
+119 silly reify ]
+120 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-linux-x64-musl
+121 silly reify mark deleted [
+121 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-linux-x64-musl'
+121 silly reify ]
+122 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-linux-x64-gnu
+123 silly reify mark deleted [
+123 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-linux-x64-gnu'
+123 silly reify ]
+124 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-linux-arm64-musl
+125 silly reify mark deleted [
+125 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-linux-arm64-musl'
+125 silly reify ]
+126 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-linux-arm64-gnu
+127 silly reify mark deleted [
+127 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-linux-arm64-gnu'
+127 silly reify ]
+128 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-linux-arm-gnueabihf
+129 silly reify mark deleted [
+129 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-linux-arm-gnueabihf'
+129 silly reify ]
+130 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-freebsd-x64
+131 silly reify mark deleted [
+131 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-freebsd-x64'
+131 silly reify ]
+132 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-darwin-x64
+133 silly reify mark deleted [
+133 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-darwin-x64'
+133 silly reify ]
+134 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-darwin-arm64
+135 silly reify mark deleted [
+135 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-darwin-arm64'
+135 silly reify ]
+136 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tailwindcss\oxide-android-arm64
+137 silly reify mark deleted [
+137 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tailwindcss\\oxide-android-arm64'
+137 silly reify ]
+138 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-win32-ia32-msvc
+139 silly reify mark deleted [
+139 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-win32-ia32-msvc'
+139 silly reify ]
+140 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-win32-arm64-msvc
+141 silly reify mark deleted [
+141 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-win32-arm64-msvc'
+141 silly reify ]
+142 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-openharmony-arm64
+143 silly reify mark deleted [
+143 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-openharmony-arm64'
+143 silly reify ]
+144 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-openbsd-x64
+145 silly reify mark deleted [
+145 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-openbsd-x64'
+145 silly reify ]
+146 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-x64-musl
+147 silly reify mark deleted [
+147 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-x64-musl'
+147 silly reify ]
+148 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-x64-gnu
+149 silly reify mark deleted [
+149 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-x64-gnu'
+149 silly reify ]
+150 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-s390x-gnu
+151 silly reify mark deleted [
+151 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-s390x-gnu'
+151 silly reify ]
+152 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-riscv64-musl
+153 silly reify mark deleted [
+153 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-riscv64-musl'
+153 silly reify ]
+154 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-riscv64-gnu
+155 silly reify mark deleted [
+155 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-riscv64-gnu'
+155 silly reify ]
+156 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-ppc64-musl
+157 silly reify mark deleted [
+157 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-ppc64-musl'
+157 silly reify ]
+158 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-ppc64-gnu
+159 silly reify mark deleted [
+159 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-ppc64-gnu'
+159 silly reify ]
+160 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-loong64-musl
+161 silly reify mark deleted [
+161 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-loong64-musl'
+161 silly reify ]
+162 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-loong64-gnu
+163 silly reify mark deleted [
+163 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-loong64-gnu'
+163 silly reify ]
+164 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-arm64-musl
+165 silly reify mark deleted [
+165 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-arm64-musl'
+165 silly reify ]
+166 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-arm64-gnu
+167 silly reify mark deleted [
+167 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-arm64-gnu'
+167 silly reify ]
+168 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-arm-musleabihf
+169 silly reify mark deleted [
+169 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-arm-musleabihf'
+169 silly reify ]
+170 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-linux-arm-gnueabihf
+171 silly reify mark deleted [
+171 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-linux-arm-gnueabihf'
+171 silly reify ]
+172 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-freebsd-x64
+173 silly reify mark deleted [
+173 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-freebsd-x64'
+173 silly reify ]
+174 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-freebsd-arm64
+175 silly reify mark deleted [
+175 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-freebsd-arm64'
+175 silly reify ]
+176 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-darwin-x64
+177 silly reify mark deleted [
+177 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-darwin-x64'
+177 silly reify ]
+178 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-darwin-arm64
+179 silly reify mark deleted [
+179 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-darwin-arm64'
+179 silly reify ]
+180 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-android-arm64
+181 silly reify mark deleted [
+181 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-android-arm64'
+181 silly reify ]
+182 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@rollup\rollup-android-arm-eabi
+183 silly reify mark deleted [
+183 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@rollup\\rollup-android-arm-eabi'
+183 silly reify ]
+184 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@next\swc-win32-arm64-msvc
+185 silly reify mark deleted [
+185 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@next\\swc-win32-arm64-msvc'
+185 silly reify ]
+186 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@next\swc-linux-x64-musl
+187 silly reify mark deleted [
+187 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@next\\swc-linux-x64-musl'
+187 silly reify ]
+188 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@next\swc-linux-x64-gnu
+189 silly reify mark deleted [
+189 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@next\\swc-linux-x64-gnu'
+189 silly reify ]
+190 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@next\swc-linux-arm64-musl
+191 silly reify mark deleted [
+191 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@next\\swc-linux-arm64-musl'
+191 silly reify ]
+192 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@next\swc-linux-arm64-gnu
+193 silly reify mark deleted [
+193 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@next\\swc-linux-arm64-gnu'
+193 silly reify ]
+194 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@next\swc-darwin-x64
+195 silly reify mark deleted [
+195 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@next\\swc-darwin-x64'
+195 silly reify ]
+196 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@next\swc-darwin-arm64
+197 silly reify mark deleted [
+197 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@next\\swc-darwin-arm64'
+197 silly reify ]
+198 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@napi-rs\lzma-linux-x64-gnu
+199 silly reify mark deleted [
+199 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@napi-rs\\lzma-linux-x64-gnu'
+199 silly reify ]
+200 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-win32-ia32
+201 silly reify mark deleted [
+201 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-win32-ia32'
+201 silly reify ]
+202 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-win32-arm64
+203 silly reify mark deleted [
+203 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-win32-arm64'
+203 silly reify ]
+204 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-webcontainers-wasm32
+205 silly reify mark deleted [
+205 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-webcontainers-wasm32'
+205 silly reify ]
+206 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linuxmusl-x64
+207 silly reify mark deleted [
+207 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linuxmusl-x64'
+207 silly reify ]
+208 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linuxmusl-arm64
+209 silly reify mark deleted [
+209 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linuxmusl-arm64'
+209 silly reify ]
+210 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linux-x64
+211 silly reify mark deleted [
+211 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linux-x64'
+211 silly reify ]
+212 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linux-s390x
+213 silly reify mark deleted [
+213 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linux-s390x'
+213 silly reify ]
+214 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linux-riscv64
+215 silly reify mark deleted [
+215 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linux-riscv64'
+215 silly reify ]
+216 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linux-ppc64
+217 silly reify mark deleted [
+217 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linux-ppc64'
+217 silly reify ]
+218 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linux-arm64
+219 silly reify mark deleted [
+219 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linux-arm64'
+219 silly reify ]
+220 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-linux-arm
+221 silly reify mark deleted [
+221 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-linux-arm'
+221 silly reify ]
+222 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linuxmusl-x64
+223 silly reify mark deleted [
+223 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linuxmusl-x64'
+223 silly reify ]
+224 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linuxmusl-arm64
+225 silly reify mark deleted [
+225 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linuxmusl-arm64'
+225 silly reify ]
+226 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linux-x64
+227 silly reify mark deleted [
+227 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linux-x64'
+227 silly reify ]
+228 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linux-s390x
+229 silly reify mark deleted [
+229 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linux-s390x'
+229 silly reify ]
+230 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linux-riscv64
+231 silly reify mark deleted [
+231 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linux-riscv64'
+231 silly reify ]
+232 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linux-ppc64
+233 silly reify mark deleted [
+233 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linux-ppc64'
+233 silly reify ]
+234 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linux-arm64
+235 silly reify mark deleted [
+235 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linux-arm64'
+235 silly reify ]
+236 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-linux-arm
+237 silly reify mark deleted [
+237 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-linux-arm'
+237 silly reify ]
+238 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-darwin-x64
+239 silly reify mark deleted [
+239 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-darwin-x64'
+239 silly reify ]
+240 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-libvips-darwin-arm64
+241 silly reify mark deleted [
+241 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-libvips-darwin-arm64'
+241 silly reify ]
+242 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-freebsd-wasm32
+243 silly reify mark deleted [
+243 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-freebsd-wasm32'
+243 silly reify ]
+244 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-darwin-x64
+245 silly reify mark deleted [
+245 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-darwin-x64'
+245 silly reify ]
+246 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@img\sharp-darwin-arm64
+247 silly reify mark deleted [
+247 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@img\\sharp-darwin-arm64'
+247 silly reify ]
+248 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\win32-ia32
+249 silly reify mark deleted [
+249 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\win32-ia32'
+249 silly reify ]
+250 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\win32-arm64
+251 silly reify mark deleted [
+251 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\win32-arm64'
+251 silly reify ]
+252 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\sunos-x64
+253 silly reify mark deleted [
+253 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\sunos-x64'
+253 silly reify ]
+254 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\openharmony-arm64
+255 silly reify mark deleted [
+255 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\openharmony-arm64'
+255 silly reify ]
+256 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\openbsd-x64
+257 silly reify mark deleted [
+257 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\openbsd-x64'
+257 silly reify ]
+258 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\openbsd-arm64
+259 silly reify mark deleted [
+259 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\openbsd-arm64'
+259 silly reify ]
+260 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\netbsd-x64
+261 silly reify mark deleted [
+261 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\netbsd-x64'
+261 silly reify ]
+262 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\netbsd-arm64
+263 silly reify mark deleted [
+263 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\netbsd-arm64'
+263 silly reify ]
+264 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-x64
+265 silly reify mark deleted [
+265 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-x64'
+265 silly reify ]
+266 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-s390x
+267 silly reify mark deleted [
+267 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-s390x'
+267 silly reify ]
+268 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-riscv64
+269 silly reify mark deleted [
+269 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-riscv64'
+269 silly reify ]
+270 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-ppc64
+271 silly reify mark deleted [
+271 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-ppc64'
+271 silly reify ]
+272 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-mips64el
+273 silly reify mark deleted [
+273 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-mips64el'
+273 silly reify ]
+274 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-loong64
+275 silly reify mark deleted [
+275 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-loong64'
+275 silly reify ]
+276 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-ia32
+277 silly reify mark deleted [
+277 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-ia32'
+277 silly reify ]
+278 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-arm64
+279 silly reify mark deleted [
+279 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-arm64'
+279 silly reify ]
+280 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\linux-arm
+281 silly reify mark deleted [
+281 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\linux-arm'
+281 silly reify ]
+282 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\freebsd-x64
+283 silly reify mark deleted [
+283 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\freebsd-x64'
+283 silly reify ]
+284 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\freebsd-arm64
+285 silly reify mark deleted [
+285 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\freebsd-arm64'
+285 silly reify ]
+286 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\darwin-x64
+287 silly reify mark deleted [
+287 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\darwin-x64'
+287 silly reify ]
+288 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\darwin-arm64
+289 silly reify mark deleted [
+289 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\darwin-arm64'
+289 silly reify ]
+290 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\android-x64
+291 silly reify mark deleted [
+291 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\android-x64'
+291 silly reify ]
+292 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\android-arm64
+293 silly reify mark deleted [
+293 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\android-arm64'
+293 silly reify ]
+294 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\android-arm
+295 silly reify mark deleted [
+295 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\android-arm'
+295 silly reify ]
+296 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@esbuild\aix-ppc64
+297 silly reify mark deleted [
+297 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@esbuild\\aix-ppc64'
+297 silly reify ]
+298 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-wasm32-wasi
+299 silly reify mark deleted [
+299 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-wasm32-wasi'
+299 silly reify ]
+300 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-wasm32-wasi\node_modules\@emnapi\core
+301 silly reify mark deleted [
+301 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-wasm32-wasi\\node_modules\\@emnapi\\core'
+301 silly reify ]
+302 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-wasm32-wasi\node_modules\@emnapi\runtime
+303 silly reify mark deleted [
+303 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-wasm32-wasi\\node_modules\\@emnapi\\runtime'
+303 silly reify ]
+304 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@napi-rs\wasm-runtime
+305 silly reify mark deleted [
+305 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@napi-rs\\wasm-runtime'
+305 silly reify ]
+306 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@unrs\resolver-binding-wasm32-wasi\node_modules\@emnapi\wasi-threads
+307 silly reify mark deleted [
+307 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@unrs\\resolver-binding-wasm32-wasi\\node_modules\\@emnapi\\wasi-threads'
+307 silly reify ]
+308 verbose reify failed optional dependency C:\Users\Onoca\Desktop\Arvutitark Scraper\node_modules\@tybys\wasm-util
+309 silly reify mark deleted [
+309 silly reify   'C:\\Users\\Onoca\\Desktop\\Arvutitark Scraper\\node_modules\\@tybys\\wasm-util'
+309 silly reify ]
+310 http cache @tybys/wasm-util@https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.4.tgz 0ms (cache hit)
+311 http cache @napi-rs/wasm-runtime@https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-1.2.4.tgz 0ms (cache hit)
+312 http cache cookie@https://registry.npmjs.org/cookie/-/cookie-1.1.1.tgz 0ms (cache hit)
+313 silly tarball no local data for @tybys/wasm-util@https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.4.tgz. Extracting by manifest.
+314 http cache @emnapi/runtime@https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.10.0.tgz 0ms (cache hit)
+315 http cache @supabase/ssr@https://registry.npmjs.org/@supabase/ssr/-/ssr-0.12.7.tgz 0ms (cache hit)
+316 silly tarball no local data for @napi-rs/wasm-runtime@https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-1.2.4.tgz. Extracting by manifest.
+317 silly tarball no local data for cookie@https://registry.npmjs.org/cookie/-/cookie-1.1.1.tgz. Extracting by manifest.
+318 silly tarball no local data for @emnapi/runtime@https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.10.0.tgz. Extracting by manifest.
+319 silly tarball no local data for @supabase/ssr@https://registry.npmjs.org/@supabase/ssr/-/ssr-0.12.7.tgz. Extracting by manifest.
+320 http fetch GET 200 https://registry.npmjs.org/cookie/-/cookie-1.1.1.tgz 92ms (cache miss)
+321 http fetch GET 200 https://registry.npmjs.org/@emnapi/runtime/-/runtime-1.10.0.tgz 465ms (cache miss)
+322 http fetch GET 200 https://registry.npmjs.org/@napi-rs/wasm-runtime/-/wasm-runtime-1.2.4.tgz 612ms (cache miss)
+323 http fetch GET 200 https://registry.npmjs.org/@tybys/wasm-util/-/wasm-util-0.10.4.tgz 1111ms (cache miss)
+324 http fetch GET 200 https://registry.npmjs.org/@supabase/ssr/-/ssr-0.12.7.tgz 1578ms (cache miss)
+325 silly ADD node_modules/cookie
+326 silly ADD node_modules/@supabase/ssr
+327 silly ADD node_modules/lightningcss-win32-arm64-msvc
+328 silly ADD node_modules/lightningcss-linux-x64-musl
+329 silly ADD node_modules/lightningcss-linux-x64-gnu
+330 silly ADD node_modules/lightningcss-linux-arm64-musl
+331 silly ADD node_modules/lightningcss-linux-arm64-gnu
+332 silly ADD node_modules/lightningcss-linux-arm-gnueabihf
+333 silly ADD node_modules/lightningcss-freebsd-x64
+334 silly ADD node_modules/lightningcss-darwin-x64
+335 silly ADD node_modules/lightningcss-darwin-arm64
+336 silly ADD node_modules/lightningcss-android-arm64
+337 silly ADD node_modules/fsevents
+338 silly ADD node_modules/@unrs/resolver-binding-win32-ia32-msvc
+339 silly ADD node_modules/@unrs/resolver-binding-win32-arm64-msvc
+340 silly ADD node_modules/@unrs/resolver-binding-openharmony-arm64
+341 silly ADD node_modules/@unrs/resolver-binding-linux-x64-musl
+342 silly ADD node_modules/@unrs/resolver-binding-linux-x64-gnu
+343 silly ADD node_modules/@unrs/resolver-binding-linux-s390x-gnu
+344 silly ADD node_modules/@unrs/resolver-binding-linux-riscv64-musl
+345 silly ADD node_modules/@unrs/resolver-binding-linux-riscv64-gnu
+346 silly ADD node_modules/@unrs/resolver-binding-linux-ppc64-gnu
+347 silly ADD node_modules/@unrs/resolver-binding-linux-loong64-musl
+348 silly ADD node_modules/@unrs/resolver-binding-linux-loong64-gnu
+349 silly ADD node_modules/@unrs/resolver-binding-linux-arm64-musl
+350 silly ADD node_modules/@unrs/resolver-binding-linux-arm64-gnu
+351 silly ADD node_modules/@unrs/resolver-binding-linux-arm-musleabihf
+352 silly ADD node_modules/@unrs/resolver-binding-linux-arm-gnueabihf
+353 silly ADD node_modules/@unrs/resolver-binding-freebsd-x64
+354 silly ADD node_modules/@unrs/resolver-binding-darwin-x64
+355 silly ADD node_modules/@unrs/resolver-binding-darwin-arm64
+356 silly ADD node_modules/@unrs/resolver-binding-android-arm64
+357 silly ADD node_modules/@unrs/resolver-binding-android-arm-eabi
+358 silly ADD node_modules/@tybys/wasm-util
+359 silly ADD node_modules/@tailwindcss/oxide-win32-arm64-msvc
+360 silly ADD node_modules/@tailwindcss/oxide-wasm32-wasi
+361 silly ADD node_modules/@tailwindcss/oxide-linux-x64-musl
+362 silly ADD node_modules/@tailwindcss/oxide-linux-x64-gnu
+363 silly ADD node_modules/@tailwindcss/oxide-linux-arm64-musl
+364 silly ADD node_modules/@tailwindcss/oxide-linux-arm64-gnu
+365 silly ADD node_modules/@tailwindcss/oxide-linux-arm-gnueabihf
+366 silly ADD node_modules/@tailwindcss/oxide-freebsd-x64
+367 silly ADD node_modules/@tailwindcss/oxide-darwin-x64
+368 silly ADD node_modules/@tailwindcss/oxide-darwin-arm64
+369 silly ADD node_modules/@tailwindcss/oxide-android-arm64
+370 silly ADD node_modules/@rollup/rollup-win32-ia32-msvc
+371 silly ADD node_modules/@rollup/rollup-win32-arm64-msvc
+372 silly ADD node_modules/@rollup/rollup-openharmony-arm64
+373 silly ADD node_modules/@rollup/rollup-openbsd-x64
+374 silly ADD node_modules/@rollup/rollup-linux-x64-musl
+375 silly ADD node_modules/@rollup/rollup-linux-x64-gnu
+376 silly ADD node_modules/@rollup/rollup-linux-s390x-gnu
+377 silly ADD node_modules/@rollup/rollup-linux-riscv64-musl
+378 silly ADD node_modules/@rollup/rollup-linux-riscv64-gnu
+379 silly ADD node_modules/@rollup/rollup-linux-ppc64-musl
+380 silly ADD node_modules/@rollup/rollup-linux-ppc64-gnu
+381 silly ADD node_modules/@rollup/rollup-linux-loong64-musl
+382 silly ADD node_modules/@rollup/rollup-linux-loong64-gnu
+383 silly ADD node_modules/@rollup/rollup-linux-arm64-musl
+384 silly ADD node_modules/@rollup/rollup-linux-arm64-gnu
+385 silly ADD node_modules/@rollup/rollup-linux-arm-musleabihf
+386 silly ADD node_modules/@rollup/rollup-linux-arm-gnueabihf
+387 silly ADD node_modules/@rollup/rollup-freebsd-x64
+388 silly ADD node_modules/@rollup/rollup-freebsd-arm64
+389 silly ADD node_modules/@rollup/rollup-darwin-x64
+390 silly ADD node_modules/@rollup/rollup-darwin-arm64
+391 silly ADD node_modules/@rollup/rollup-android-arm64
+392 silly ADD node_modules/@rollup/rollup-android-arm-eabi
+393 silly ADD node_modules/@next/swc-win32-arm64-msvc
+394 silly ADD node_modules/@next/swc-linux-x64-musl
+395 silly ADD node_modules/@next/swc-linux-x64-gnu
+396 silly ADD node_modules/@next/swc-linux-arm64-musl
+397 silly ADD node_modules/@next/swc-linux-arm64-gnu
+398 silly ADD node_modules/@next/swc-darwin-x64
+399 silly ADD node_modules/@next/swc-darwin-arm64
+400 silly ADD node_modules/@napi-rs/wasm-runtime
+401 silly ADD node_modules/@napi-rs/lzma-linux-x64-gnu
+402 silly ADD node_modules/@img/sharp-win32-ia32
+403 silly ADD node_modules/@img/sharp-win32-arm64
+404 silly ADD node_modules/@img/sharp-webcontainers-wasm32
+405 silly ADD node_modules/@img/sharp-linuxmusl-x64
+406 silly ADD node_modules/@img/sharp-linuxmusl-arm64
+407 silly ADD node_modules/@img/sharp-linux-x64
+408 silly ADD node_modules/@img/sharp-linux-s390x
+409 silly ADD node_modules/@img/sharp-linux-riscv64
+410 silly ADD node_modules/@img/sharp-linux-ppc64
+411 silly ADD node_modules/@img/sharp-linux-arm64
+412 silly ADD node_modules/@img/sharp-linux-arm
+413 silly ADD node_modules/@img/sharp-libvips-linuxmusl-x64
+414 silly ADD node_modules/@img/sharp-libvips-linuxmusl-arm64
+415 silly ADD node_modules/@img/sharp-libvips-linux-x64
+416 silly ADD node_modules/@img/sharp-libvips-linux-s390x
+417 silly ADD node_modules/@img/sharp-libvips-linux-riscv64
+418 silly ADD node_modules/@img/sharp-libvips-linux-ppc64
+419 silly ADD node_modules/@img/sharp-libvips-linux-arm64
+420 silly ADD node_modules/@img/sharp-libvips-linux-arm
+421 silly ADD node_modules/@img/sharp-libvips-darwin-x64
+422 silly ADD node_modules/@img/sharp-libvips-darwin-arm64
+423 silly ADD node_modules/@img/sharp-freebsd-wasm32
+424 silly ADD node_modules/@img/sharp-darwin-x64
+425 silly ADD node_modules/@img/sharp-darwin-arm64
+426 silly ADD node_modules/@esbuild/win32-ia32
+427 silly ADD node_modules/@esbuild/win32-arm64
+428 silly ADD node_modules/@esbuild/sunos-x64
+429 silly ADD node_modules/@esbuild/openharmony-arm64
+430 silly ADD node_modules/@esbuild/openbsd-x64
+431 silly ADD node_modules/@esbuild/openbsd-arm64
+432 silly ADD node_modules/@esbuild/netbsd-x64
+433 silly ADD node_modules/@esbuild/netbsd-arm64
+434 silly ADD node_modules/@esbuild/linux-x64
+435 silly ADD node_modules/@esbuild/linux-s390x
+436 silly ADD node_modules/@esbuild/linux-riscv64
+437 silly ADD node_modules/@esbuild/linux-ppc64
+438 silly ADD node_modules/@esbuild/linux-mips64el
+439 silly ADD node_modules/@esbuild/linux-loong64
+440 silly ADD node_modules/@esbuild/linux-ia32
+441 silly ADD node_modules/@esbuild/linux-arm64
+442 silly ADD node_modules/@esbuild/linux-arm
+443 silly ADD node_modules/@esbuild/freebsd-x64
+444 silly ADD node_modules/@esbuild/freebsd-arm64
+445 silly ADD node_modules/@esbuild/darwin-x64
+446 silly ADD node_modules/@esbuild/darwin-arm64
+447 silly ADD node_modules/@esbuild/android-x64
+448 silly ADD node_modules/@esbuild/android-arm64
+449 silly ADD node_modules/@esbuild/android-arm
+450 silly ADD node_modules/@esbuild/aix-ppc64
+451 silly REMOVE node_modules/@emnapi/wasi-threads
+452 silly CHANGE node_modules/@unrs/resolver-binding-wasm32-wasi
+453 silly ADD node_modules/@unrs/resolver-binding-wasm32-wasi/node_modules/@emnapi/runtime
+454 verbose cwd C:\Users\Onoca\Desktop\Arvutitark Scraper
+455 verbose os Windows_NT 10.0.22631
+456 verbose node v24.11.0
+457 verbose npm  v11.6.1
+458 verbose exit 0
+459 info ok

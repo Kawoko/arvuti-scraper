@@ -660,22 +660,10 @@ export function extractSpecs(
     case "hdd":
     case "ssd":
       return extractStorageSpecs(product, category);
-    case "custom":
-      return extractCustomSpecs(product);
     case "ram":
     default:
       return extractRamSpecs(product);
   }
-}
-
-/**
- * Custom-tracked items have no category of their own, so specs are extracted
- * using whichever category the retailer files the product under.
- */
-export function extractCustomSpecs(product: ArvutitarkProduct): ProductSpecs {
-  const source = declaredCategoryOf(product);
-  if (source === null || source === "custom") return extractRamSpecs(product);
-  return extractSpecs(product, source);
 }
 
 /* ==========================================================================
@@ -760,10 +748,9 @@ export function normalizeProduct(
   const id = coerceProductId(raw.id);
   if (id === null) return null;
 
-  // Reject a product the retailer files under a different category. The custom
-  // group is exempt: it deliberately pins products from any category.
+  // Reject a product the retailer files under a different category.
   const declaredCategory = declaredCategoryOf(raw);
-  if (category !== "custom" && declaredCategory !== null && declaredCategory !== category) {
+  if (declaredCategory !== null && declaredCategory !== category) {
     return null;
   }
 
@@ -789,7 +776,7 @@ export function normalizeProduct(
       localizedName(raw.brand, "et"),
     url: buildProductUrl(raw.path),
     specs: extractSpecs(raw, category),
-    sourceCategory: category === "custom" ? declaredCategory : null,
+    sourceCategory: null,
     price,
     originalPrice: toFiniteNumber(raw.original_price),
     sourcePriceUpdatedAt: normalizeIsoTimestamp(raw.price_updated_at),
@@ -840,12 +827,11 @@ export function matchesCategoryCriteria(product: NormalizedProduct): boolean {
       return matchesGpuCriteria(product);
     case "ram":
       return matchesRamCriteria(product);
-    // CPU, storage and custom groups are already constrained by their filter
-    // (or explicitly pinned by product id), so nothing further is rejected.
+    // CPU and storage groups are already constrained by their filter, so
+    // nothing further is rejected.
     case "cpu":
     case "hdd":
     case "ssd":
-    case "custom":
     default:
       return true;
   }

@@ -20,6 +20,9 @@ import type { ComponentCategory } from "./arvutitark/types";
  * Adding a group is one entry here plus a spec extractor in
  * `lib/arvutitark/normalize.ts`. The scraper loop, the query layer, the routes
  * and the UI all read from this list.
+ *
+ * User favourites are deliberately NOT a category here: they are tracked per
+ * user in the database and span every group.
  */
 export interface CategoryDefinition {
   category: ComponentCategory;
@@ -27,17 +30,14 @@ export interface CategoryDefinition {
   label: string;
   /** Page heading. */
   title: string;
-  subtitle: string;
   /** Route for the listing page. */
   path: string;
   /** Base path for product detail pages, e.g. `/gpu/1527001`. */
   detailBasePath: string;
-  /** Hint displayed beneath the "Products tracked" figure. */
-  specHint: string;
-  /** Arvutitark category id, or null when the group is pinned by product id. */
-  arvutitarkCategoryId: number | null;
-  /** Attribute filter, or null for id-pinned groups. */
-  attributes: string | null;
+  /** Arvutitark category id. */
+  arvutitarkCategoryId: number;
+  /** Attribute filter. */
+  attributes: string;
   /** Brands filter, for the one category whose URL uses one. */
   brands?: string;
   /** Column header for the capacity field. */
@@ -56,10 +56,8 @@ export const CATEGORY_DEFINITIONS: Record<ComponentCategory, CategoryDefinition>
     category: "ram",
     label: "RAM",
     title: "RAM Price Tracker",
-    subtitle: "Arvutitark price history · desktop DDR5 UDIMM, 5600 & 6000 MHz",
     path: "/",
     detailBasePath: "/ram",
-    specHint: "DDR5 UDIMM 5600 / 6000 MHz",
     arvutitarkCategoryId: ARVUTITARK_RAM_CATEGORY_ID,
     attributes: ARVUTITARK_RAM_ATTRIBUTES,
     capacityLabel: "Capacity",
@@ -69,10 +67,8 @@ export const CATEGORY_DEFINITIONS: Record<ComponentCategory, CategoryDefinition>
     category: "gpu",
     label: "GPUs",
     title: "GPU Price Tracker",
-    subtitle: "Arvutitark price history · 16 GB current-generation graphics cards",
     path: "/gpu",
     detailBasePath: "/gpu",
-    specHint: "16 GB · RTX 50 series, RX 9000, Arc",
     arvutitarkCategoryId: ARVUTITARK_GPU_CATEGORY_ID,
     attributes: ARVUTITARK_GPU_ATTRIBUTES,
     capacityLabel: "VRAM",
@@ -82,10 +78,8 @@ export const CATEGORY_DEFINITIONS: Record<ComponentCategory, CategoryDefinition>
     category: "cpu",
     label: "CPUs",
     title: "CPU Price Tracker",
-    subtitle: "Arvutitark price history · Ryzen 5/7/9 and Core Ultra 5/7/9",
     path: "/cpu",
     detailBasePath: "/cpu",
-    specHint: "AMD Ryzen 5/7/9 · Intel Core Ultra 5/7/9",
     arvutitarkCategoryId: ARVUTITARK_CPU_CATEGORY_ID,
     attributes: ARVUTITARK_CPU_ATTRIBUTES,
     brands: ARVUTITARK_CPU_BRANDS,
@@ -96,10 +90,8 @@ export const CATEGORY_DEFINITIONS: Record<ComponentCategory, CategoryDefinition>
     category: "hdd",
     label: "HDDs",
     title: "HDD Price Tracker",
-    subtitle: "Arvutitark price history · mechanical drives from 1 TB to 5 TB",
     path: "/hdd",
     detailBasePath: "/hdd",
-    specHint: "1 TB – 5 TB mechanical drives",
     arvutitarkCategoryId: ARVUTITARK_HDD_CATEGORY_ID,
     attributes: ARVUTITARK_HDD_ATTRIBUTES,
     capacityLabel: "Capacity",
@@ -109,28 +101,12 @@ export const CATEGORY_DEFINITIONS: Record<ComponentCategory, CategoryDefinition>
     category: "ssd",
     label: "SSDs",
     title: "SSD Price Tracker",
-    subtitle:
-      "Arvutitark price history · NVMe and SATA drives, 3500+ MB/s read and write",
     path: "/ssd",
     detailBasePath: "/ssd",
-    specHint: "3500+ MB/s read & write",
     arvutitarkCategoryId: ARVUTITARK_SSD_CATEGORY_ID,
     attributes: ARVUTITARK_SSD_ATTRIBUTES,
     capacityLabel: "Capacity",
     facets: { capacity: true, speed: false, casLatency: false, moduleCount: false },
-  },
-  custom: {
-    category: "custom",
-    label: "Custom",
-    title: "Custom Tracked Items",
-    subtitle: "Individually pinned products, tracked outside every category filter",
-    path: "/custom",
-    detailBasePath: "/custom",
-    specHint: "Pinned by product id, independent of category filters",
-    arvutitarkCategoryId: null,
-    attributes: null,
-    capacityLabel: "Capacity",
-    facets: { capacity: false, speed: false, casLatency: false, moduleCount: false },
   },
 };
 
@@ -141,7 +117,6 @@ export const CATEGORY_LIST: ReadonlyArray<CategoryDefinition> = [
   CATEGORY_DEFINITIONS.cpu,
   CATEGORY_DEFINITIONS.hdd,
   CATEGORY_DEFINITIONS.ssd,
-  CATEGORY_DEFINITIONS.custom,
 ];
 
 export const COMPONENT_CATEGORIES: ReadonlyArray<ComponentCategory> = [
@@ -150,7 +125,6 @@ export const COMPONENT_CATEGORIES: ReadonlyArray<ComponentCategory> = [
   "cpu",
   "hdd",
   "ssd",
-  "custom",
 ];
 
 export function isComponentCategory(value: string): value is ComponentCategory {

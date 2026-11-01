@@ -2,17 +2,17 @@ import { Suspense } from "react";
 import { SearchX } from "lucide-react";
 
 import { FilterToolbar } from "@/components/filters/filter-toolbar";
-import { Pagination } from "@/components/filters/pagination";
 import { PageShell } from "@/components/layout/page-shell";
-import { ProductList } from "@/components/products/product-list";
+import { ProductBrowser } from "@/components/products/product-browser";
 import { StaleDataNotice } from "@/components/products/stale-data-notice";
-import { SummaryCards } from "@/components/products/summary-cards";
+import { StatStrip } from "@/components/products/stat-strip";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { CategoryDefinition } from "@/lib/categories";
 import { hasActiveFilters, parseProductFilters, type SearchParamsInput } from "@/lib/filters";
-import { getFilterFacets, getProductList } from "@/lib/queries/products";
+import { getFilterFacetsCached, getProductList } from "@/lib/queries/products";
 import { getDashboardStats } from "@/lib/queries/stats";
+import { getTrackingContext } from "@/lib/queries/tracked";
 
 interface CategoryListingProps {
   definition: CategoryDefinition;
@@ -22,33 +22,31 @@ interface CategoryListingProps {
 /**
  * The product listing for one category.
  *
- * Shared by `/` (RAM) and `/gpu`, so adding a category is a route file plus an
- * entry in the category registry — no duplicated page logic.
+ * Shared by `/` (RAM) and the other group routes, so adding a category is a
+ * route file plus an entry in the category registry — no duplicated page logic.
  */
 export async function CategoryListing({ definition, searchParams }: CategoryListingProps) {
   const filters = parseProductFilters(searchParams);
 
-  const [stats, facets, list] = await Promise.all([
+  const [stats, facets, list, tracking] = await Promise.all([
     getDashboardStats(definition.category),
-    getFilterFacets(definition.category),
+    getFilterFacetsCached(definition.category),
     getProductList(filters, definition.category),
+    getTrackingContext(),
   ]);
 
   const filtered = hasActiveFilters(filters);
-  const firstRow = list.total === 0 ? 0 : (list.page - 1) * list.pageSize + 1;
-  const lastRow = Math.min(list.page * list.pageSize, list.total);
 
   return (
     <PageShell activePath={definition.path}>
-      <div className="space-y-6">
-        <header className="space-y-1.5">
+      <div className="space-y-5">
+        <header>
           <h1 className="text-2xl font-semibold tracking-tight">{definition.title}</h1>
-          <p className="text-sm text-muted-foreground">{definition.subtitle}</p>
         </header>
 
         <StaleDataNotice staleDays={stats.staleDays} />
 
-        <SummaryCards stats={stats} hint={definition.specHint} />
+        <StatStrip stats={stats} />
 
         <Suspense fallback={<Skeleton className="h-40 w-full rounded-xl" />}>
           <FilterToolbar
@@ -65,29 +63,23 @@ export async function CategoryListing({ definition, searchParams }: CategoryList
             title={filtered ? "No products match these filters" : "No price data yet"}
             description={
               filtered
-                ? "Try widening your search, removing a filter, or clearing the discount threshold."
-                : `The daily collection has not recorded any ${definition.label} yet. Run \`npm run scrape\` or check the status page.`
+                ? "Try widening your search or clearing a filter."
+                : `No ${definition.label} have been recorded in this group yet.`
             }
           />
         ) : (
-          <>
-            <div className="flex items-baseline justify-between gap-3">
-              <p className="text-xs text-muted-foreground tabular">
-                Showing {firstRow}–{lastRow} of {list.total}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Page {list.page} of {list.pageCount}
-              </p>
-            </div>
-
-            <ProductList rows={list.rows} filters={filters} pathname={definition.path} />
-
-            <Pagination
-              filters={filters}
-              pageCount={list.pageCount}
-              pathname={definition.path}
-            />
-          </>
+          <ProductBrowser
+            category={definition.category}
+            initialRows={list.rows}
+            initialPage={list.page}
+            initialTotal={list.total}
+            initialPageCount={list.pageCount}
+            filters={filters}
+            pathname={definition.path}
+            trackedKeys={[...tracking.trackedKeys]}
+            authenticated={tracking.user !== null}
+            loginNext={definition.path}
+          />
         )}
       </div>
     </PageShell>

@@ -151,7 +151,7 @@ export const EMPTY_PRODUCT_SPECS: ProductSpecs = {
  * A tracked group. Each group stores its own product rows and price history, so
  * enabling or refreshing one group can never overwrite another.
  */
-export type ComponentCategory = "ram" | "gpu" | "cpu" | "hdd" | "ssd" | "custom";
+export type ComponentCategory = "ram" | "gpu" | "cpu" | "hdd" | "ssd";
 
 export type Retailer = "arvutitark";
 
@@ -167,8 +167,8 @@ export interface NormalizedProduct {
   url: string | null;
   specs: ProductSpecs;
   /**
-   * For the `custom` group, the Arvutitark category the product actually belongs
-   * to (detected from `primary_category_id`). Null for category-tracked rows.
+   * The retailer's own category when it differs from the group we store the row
+   * under. Always null today; kept so cross-category imports remain possible.
    */
   sourceCategory: ComponentCategory | null;
   price: number;

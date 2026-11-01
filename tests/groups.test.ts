@@ -11,16 +11,13 @@ import {
 } from "@/lib/arvutitark/config";
 import {
   extractCpuSpecs,
-  extractCustomSpecs,
   extractGpuSpecs,
   extractStorageSpecs,
   formatSpecSummary,
   normalizeProduct,
-  toSnapshotRow,
 } from "@/lib/arvutitark/normalize";
 import type { ArvutitarkProduct } from "@/lib/arvutitark/types";
 import { CATEGORY_LIST, productDetailHref } from "@/lib/categories";
-import { CUSTOM_ITEM_IDS, customItemsIdFilter } from "@/lib/custom-items";
 import { DEAL_COLUMNS } from "@/lib/queries/deals";
 import { LIST_COLUMNS } from "@/lib/queries/products";
 import { buildSnapshotRows } from "@/lib/scraper/run";
@@ -31,14 +28,7 @@ import gpuFixture from "./fixtures/arvutitark-gpu-page.json";
 const products = groupsFixture.data as unknown as ArvutitarkProduct[];
 const gpuProducts = gpuFixture.data as unknown as ArvutitarkProduct[];
 
-const [cpu, hdd, ssd, lexar, gskill, asrock] = products as [
-  ArvutitarkProduct,
-  ArvutitarkProduct,
-  ArvutitarkProduct,
-  ArvutitarkProduct,
-  ArvutitarkProduct,
-  ArvutitarkProduct,
-];
+const [cpu, hdd, ssd] = products as [ArvutitarkProduct, ArvutitarkProduct, ArvutitarkProduct];
 
 const silentLogger = { info: () => {}, error: () => {} };
 
@@ -112,80 +102,7 @@ describe("storage specification extraction", () => {
   });
 });
 
-describe("custom tracked item extraction", () => {
-  it("extracts SSD specs and records the source category", () => {
-    const product = normalizeProduct(lexar, "custom");
-
-    expect(product).not.toBeNull();
-    expect(product?.category).toBe("custom");
-    expect(product?.sourceCategory).toBe("ssd");
-    expect(product?.specs.capacityGb).toBe(2048);
-    expect(product?.specs.readSpeedMbs).toBe(7000);
-    expect(product?.specs.writeSpeedMbs).toBe(6000);
-  });
-
-  it("extracts RAM specs and records the source category", () => {
-    const product = normalizeProduct(gskill, "custom");
-
-    expect(product?.sourceCategory).toBe("ram");
-    expect(product?.specs.capacityGb).toBe(32);
-    expect(product?.specs.speedMhz).toBe(6000);
-    expect(product?.specs.casLatency).toBe(30);
-    expect(product?.specs.moduleCount).toBe(2);
-    expect(product?.specs.capacityPerModuleGb).toBe(16);
-    expect(product?.specs.formFactor).toBe("UDIMM");
-    expect(product?.specs.voltage).toBe(1.35);
-  });
-
-  it("extracts GPU specs even though the chipset filter would exclude older cards", () => {
-    const product = normalizeProduct(asrock, "custom");
-
-    expect(product?.sourceCategory).toBe("gpu");
-    expect(product?.specs.chipset).toBe("AMD Radeon RX 9070");
-    expect(product?.specs.capacityGb).toBe(16);
-    expect(product?.specs.memoryType).toBe("GDDR6");
-  });
-
-  it("leaves source_category null for category-tracked rows", () => {
-    expect(normalizeProduct(ssd, "ssd")?.sourceCategory).toBeNull();
-    expect(normalizeProduct(cpu, "cpu")?.sourceCategory).toBeNull();
-  });
-
-  it("falls back to RAM parsing when the source category is unknown", () => {
-    const specs = extractCustomSpecs({ id: 1, name: { en: "Unknown DDR5 16GB 5600MHz UDIMM" } });
-
-    expect(specs.capacityGb).toBe(16);
-    expect(specs.memoryType).toBe("DDR5");
-  });
-});
-
 describe("group independence", () => {
-  it("keeps the same product id as a separate row per group", () => {
-    const asGpu = normalizeProduct(asrock, "gpu");
-    const asCustom = normalizeProduct(asrock, "custom");
-
-    // The composite identity (id, category) is what lets both exist at once.
-    const gpuRow = toSnapshotRow(asGpu!);
-    const customRow = toSnapshotRow(asCustom!);
-
-    expect(gpuRow.id).toBe(customRow.id);
-    expect(gpuRow.category).toBe("gpu");
-    expect(customRow.category).toBe("custom");
-  });
-
-  it("keeps the GPU group's chipset filter while the custom group accepts anything", () => {
-    // The fixture contains an RTX 4060 Ti, which is off the tracked whitelist.
-    const asGpu = buildSnapshotRows(gpuProducts, "gpu", silentLogger);
-    const asCustom = buildSnapshotRows(gpuProducts, "custom", silentLogger);
-
-    expect(asGpu.rows).toHaveLength(3);
-    expect(asGpu.skippedByCriteria).toBe(1);
-
-    // Pinning is deliberate: the custom group must not apply category filters.
-    expect(asCustom.rows).toHaveLength(4);
-    expect(asCustom.skippedByCriteria).toBe(0);
-  });
-
   it("does not filter CPU or storage rows locally", () => {
     const cpuRows = buildSnapshotRows([cpu], "cpu", silentLogger);
     const hddRows = buildSnapshotRows([hdd], "hdd", silentLogger);
@@ -204,9 +121,9 @@ describe("group independence", () => {
     expect(normalizeProduct(ssd, "cpu")).toBeNull();
   });
 
-  it("still allows the custom group to take products from any category", () => {
-    expect(normalizeProduct(ssd, "custom")).not.toBeNull();
-    expect(normalizeProduct(cpu, "custom")).not.toBeNull();
+  it("leaves source_category null for category-tracked rows", () => {
+    expect(normalizeProduct(ssd, "ssd")?.sourceCategory).toBeNull();
+    expect(normalizeProduct(cpu, "cpu")?.sourceCategory).toBeNull();
   });
 });
 
@@ -230,18 +147,6 @@ describe("request building for the new groups", () => {
     );
     expect(ARVUTITARK_HDD_ATTRIBUTES).not.toContain(",");
     expect(ARVUTITARK_SSD_ATTRIBUTES).not.toContain(",");
-  });
-
-  it("requests pinned items by id and omits the category filters", () => {
-    const url = buildProductsUrl("https://cms.arvutitark.ee/api/products", {
-      page: 1,
-      ids: customItemsIdFilter(),
-    });
-
-    expect(url).toContain("ids=1436318%2C1183913%2C1392056");
-    // Sending them would exclude the very products being pinned.
-    expect(url).not.toContain("attributes=");
-    expect(url).not.toContain("categories=");
   });
 });
 
@@ -328,26 +233,13 @@ describe("group registry", () => {
       "cpu",
       "hdd",
       "ssd",
-      "custom",
     ]);
   });
 
-  it("pins exactly the three requested custom items", () => {
-    expect(CUSTOM_ITEM_IDS).toEqual([1436318, 1183913, 1392056]);
-  });
-
   it("routes each group's product detail pages to its own base path", () => {
-    expect(productDetailHref("custom", 1436318)).toBe("/custom/1436318");
     expect(productDetailHref("cpu", 1375186)).toBe("/cpu/1375186");
     expect(productDetailHref("hdd", 1210237)).toBe("/hdd/1210237");
     expect(productDetailHref("ssd", 1420998)).toBe("/ssd/1420998");
-  });
-
-  it("gives the custom group no category id and no attribute filter", () => {
-    const custom = CATEGORY_LIST.find((definition) => definition.category === "custom");
-
-    expect(custom?.arvutitarkCategoryId).toBeNull();
-    expect(custom?.attributes).toBeNull();
   });
 
   it("keeps GPU extraction available for category-tracked graphics cards", () => {

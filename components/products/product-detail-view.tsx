@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight, Info } from "lucide-react";
 
 import { PriceHistoryChart } from "@/components/charts/price-history-chart";
 import { PageShell } from "@/components/layout/page-shell";
+import { FavoriteButton } from "@/components/products/favorite-button";
 import { PriceChange } from "@/components/products/price-change";
 import { ProductPriceStats } from "@/components/products/product-price-stats";
 import { ProductSpecList } from "@/components/products/product-spec-list";
@@ -74,9 +75,18 @@ function AvailabilityPanel({
 interface ProductDetailViewProps {
   detail: ProductDetail;
   definition: CategoryDefinition;
+  tracked: boolean;
+  authenticated: boolean;
+  loginNext: string;
 }
 
-export function ProductDetailView({ detail, definition }: ProductDetailViewProps) {
+export function ProductDetailView({
+  detail,
+  definition,
+  tracked,
+  authenticated,
+  loginNext,
+}: ProductDetailViewProps) {
   const summary = detail.summary;
 
   // Keep product URLs canonical: a graphics card lives under /gpu, not /ram.
@@ -101,9 +111,19 @@ export function ProductDetailView({ detail, definition }: ProductDetailViewProps
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {summary.brand ?? definition.label}
             </p>
-            <h1 className="text-xl font-semibold leading-snug tracking-tight sm:text-2xl">
-              {summary.name}
-            </h1>
+            <div className="flex items-start gap-2">
+              <h1 className="text-xl font-semibold leading-snug tracking-tight sm:text-2xl">
+                {summary.name}
+              </h1>
+              <FavoriteButton
+                productId={summary.product_id}
+                category={summary.category}
+                initialTracked={tracked}
+                authenticated={authenticated}
+                loginNext={loginNext}
+                className="mt-0.5 shrink-0"
+              />
+            </div>
             {specs ? <p className="text-sm text-muted-foreground">{specs}</p> : null}
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">

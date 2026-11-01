@@ -106,7 +106,7 @@ export function FilterToolbar({ filters, facets, total, definition }: FilterTool
             <Input
               value={searchValue}
               onChange={(event) => setSearchValue(event.target.value)}
-              placeholder="Search by name, brand or SKU…"
+              placeholder="Search by name or brand…"
               aria-label="Search products"
               className="pl-9"
             />

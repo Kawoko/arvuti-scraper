@@ -11,7 +11,7 @@ interface CategoryPageProps {
 }
 
 /**
- * Listing for any tracked group: `/gpu`, `/cpu`, `/hdd`, `/ssd`, `/custom`.
+ * Listing for any tracked group: `/gpu`, `/cpu`, `/hdd`, `/ssd`.
  *
  * RAM has its own static route at `/`, which takes precedence over this dynamic
  * segment, so this file needs no special case for it.

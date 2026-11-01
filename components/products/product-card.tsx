@@ -4,25 +4,45 @@ import { Badge } from "@/components/ui/badge";
 import { productDetailHref } from "@/lib/categories";
 import { EMPTY_VALUE, formatCurrency, formatDayMonth } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
+import { trackedKey } from "@/lib/tracking";
 import type { ProductPriceSummaryRow } from "@/types/database";
 
+import { FavoriteButton } from "./favorite-button";
 import { PriceChange } from "./price-change";
 import { StockBadge } from "./stock-badge";
 
-export function ProductCard({ row }: { row: ProductPriceSummaryRow }) {
+interface ProductCardProps {
+  row: ProductPriceSummaryRow;
+  trackedKeys: ReadonlySet<string>;
+  authenticated: boolean;
+  loginNext: string;
+}
+
+export function ProductCard({ row, trackedKeys, authenticated, loginNext }: ProductCardProps) {
   const specs = specSummaryFromRow(row);
 
   return (
-    <Link
-      href={productDetailHref(row.category, row.product_id)}
-      className="surface surface-interactive block p-4 focus-visible:ring-2 focus-visible:ring-ring/40"
-    >
+    <article className="surface relative p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
           {row.brand ? <p className="text-xs text-muted-foreground">{row.brand}</p> : null}
-          <p className="line-clamp-2 text-sm font-medium leading-snug">{row.name}</p>
+          <Link
+            href={productDetailHref(row.category, row.product_id)}
+            className="line-clamp-2 text-sm font-medium leading-snug underline-offset-4 after:absolute after:inset-0 after:content-[''] hover:underline"
+          >
+            {row.name}
+          </Link>
         </div>
-        <StockBadge inStock={row.in_stock} delisted={row.is_delisted} className="shrink-0" />
+        <div className="relative z-10 flex shrink-0 items-center gap-1">
+          <StockBadge inStock={row.in_stock} delisted={row.is_delisted} />
+          <FavoriteButton
+            productId={row.product_id}
+            category={row.category}
+            initialTracked={trackedKeys.has(trackedKey(row.category, row.product_id))}
+            authenticated={authenticated}
+            loginNext={loginNext}
+          />
+        </div>
       </div>
 
       <p className="mt-2 text-xs text-muted-foreground">{specs || EMPTY_VALUE}</p>
@@ -51,6 +71,6 @@ export function ProductCard({ row }: { row: ProductPriceSummaryRow }) {
       <p className="mt-2 text-right text-[11px] text-muted-foreground">
         Updated {formatDayMonth(row.current_observed_at)}
       </p>
-    </Link>
+    </article>
   );
 }

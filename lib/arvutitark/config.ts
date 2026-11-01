@@ -52,8 +52,7 @@ export const ARVUTITARK_GPU_ATTRIBUTE_IDS = {
  * Maps an Arvutitark category id to our own category.
  *
  * Used to verify that a response actually belongs to the category we asked for:
- * a product the retailer files elsewhere is dropped rather than misfiled. Also
- * used to label custom-tracked items, which have no category of their own.
+ * a product the retailer files elsewhere is dropped rather than misfiled.
  */
 export const ARVUTITARK_CATEGORY_BY_ID: Record<number, ComponentCategory> = {
   15: "cpu",
@@ -294,7 +293,7 @@ export function readBooleanEnv(
  * Comma-separated allow-list of groups to collect.
  *
  * Lets a single group be exercised on its own without editing code, e.g.
- * `SCRAPER_GROUPS=cpu` or `SCRAPER_GROUPS=ram,gpu,custom`.
+ * `SCRAPER_GROUPS=cpu` or `SCRAPER_GROUPS=ram,gpu`.
  */
 export function readListEnv(key: string, fallback: string[], env: EnvRecord = process.env): string[] {
   const raw = env[key];
@@ -312,7 +311,7 @@ export interface ScraperRuntimeConfig {
   maxPages: number;
   /** Verbose request/response logging. Enabled with `SCRAPER_DEBUG=true`. */
   debug: boolean;
-  /** Groups to collect; defaults to every registered category plus custom items. */
+  /** Groups to collect; defaults to every registered category. */
   groups: string[];
   /**
    * Attribute filter override for graphics cards. Set `ARVUTITARK_GPU_ATTRIBUTES`
@@ -332,7 +331,7 @@ export function getScraperConfig(env: EnvRecord = process.env): ScraperRuntimeCo
     pageDelayMs: readNumericEnv("ARVUTITARK_PAGE_DELAY_MS", ARVUTITARK_DEFAULT_PAGE_DELAY_MS, env),
     maxPages: readNumericEnv("ARVUTITARK_MAX_PAGES", ARVUTITARK_DEFAULT_MAX_PAGES, env),
     debug: readBooleanEnv("SCRAPER_DEBUG", false, env),
-    groups: readListEnv("SCRAPER_GROUPS", ["ram", "gpu", "cpu", "hdd", "ssd", "custom"], env),
+    groups: readListEnv("SCRAPER_GROUPS", ["ram", "gpu", "cpu", "hdd", "ssd"], env),
     gpuAttributes: readEnv("ARVUTITARK_GPU_ATTRIBUTES", ARVUTITARK_GPU_ATTRIBUTES, env),
   };
 }

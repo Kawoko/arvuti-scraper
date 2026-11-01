@@ -28,8 +28,8 @@ export default function NotFound() {
             <Link href="/ssd" className={buttonVariants({ variant: "outline" })}>
               SSDs
             </Link>
-            <Link href="/custom" className={buttonVariants({ variant: "outline" })}>
-              Custom
+            <Link href="/tracked" className={buttonVariants({ variant: "outline" })}>
+              Tracked
             </Link>
           </div>
         }

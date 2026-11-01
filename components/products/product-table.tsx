@@ -13,9 +13,12 @@ import { productDetailHref } from "@/lib/categories";
 import { buildSortHref, type ProductFilters, type SortColumn, type SortDirection } from "@/lib/filters";
 import { EMPTY_VALUE, formatCurrency, formatDayMonth } from "@/lib/format";
 import { specSummaryFromRow } from "@/lib/presentation";
+import { trackedKey } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import type { ProductPriceSummaryRow } from "@/types/database";
 
+import { FavoriteButton } from "./favorite-button";
+import type { ProductTrackingProps } from "./product-list";
 import { PriceChange } from "./price-change";
 import { StockBadge } from "./stock-badge";
 
@@ -79,25 +82,34 @@ function SortableHeader({
   );
 }
 
-interface ProductTableProps {
+interface ProductTableProps extends ProductTrackingProps {
   rows: ProductPriceSummaryRow[];
   filters: ProductFilters;
   pathname?: string;
 }
 
-export function ProductTable({ rows, filters, pathname = "/" }: ProductTableProps) {
+export function ProductTable({
+  rows,
+  filters,
+  pathname = "/",
+  trackedKeys,
+  authenticated,
+  loginNext,
+}: ProductTableProps) {
   return (
     <div className="rounded-xl border border-border bg-card shadow-xs">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
+            <TableHead className="w-10 pl-5">
+              <span className="sr-only">Track</span>
+            </TableHead>
             <SortableHeader
               column="name"
               label="Product"
               filters={filters}
               pathname={pathname}
               align="left"
-              className="pl-5"
             />
             <TableHead>Specs</TableHead>
             <SortableHeader column="price" label="Current" filters={filters} pathname={pathname} />
@@ -119,8 +131,19 @@ export function ProductTable({ rows, filters, pathname = "/" }: ProductTableProp
             const specs = specSummaryFromRow(row);
 
             return (
-              <TableRow key={row.product_id}>
-                <TableCell className="pl-5">
+              <TableRow key={`${row.category}-${row.product_id}`}>
+                <TableCell className="pl-5 pr-0">
+                  <FavoriteButton
+                    productId={row.product_id}
+                    category={row.category}
+                    initialTracked={trackedKeys.has(trackedKey(row.category, row.product_id))}
+                    authenticated={authenticated}
+                    loginNext={loginNext}
+                    className="-ml-1"
+                  />
+                </TableCell>
+
+                <TableCell>
                   <div className="flex flex-col gap-0.5">
                     {row.brand ? (
                       <span className="text-xs text-muted-foreground">{row.brand}</span>

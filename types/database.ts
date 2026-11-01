@@ -130,6 +130,33 @@ export type IngestSnapshotResult = {
   price_count: number;
 };
 
+export type TrackedProductRow = {
+  id: number;
+  user_id: string;
+  product_id: number;
+  category: string;
+  price_at_tracking: number | null;
+  created_at: string;
+};
+
+export type NotificationSettingsRow = {
+  user_id: string;
+  price_drop_percent: number;
+  email_enabled: boolean;
+  email_address: string | null;
+  discord_webhook_url: string | null;
+  webhook_enabled: boolean;
+  webhook_url: string | null;
+  updated_at: string;
+};
+
+/** Summary row joined to the current user's tracking metadata. */
+export type TrackedProductDetailRow = ProductPriceSummaryRow & {
+  user_id: string;
+  tracked_at: string;
+  price_at_tracking: number | null;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -171,10 +198,53 @@ export type Database = {
         Update: Partial<PriceHistoryRow>;
         Relationships: [];
       };
+      tracked_products: {
+        Row: TrackedProductRow;
+        Insert: {
+          user_id: string;
+          product_id: number;
+          category: string;
+          price_at_tracking?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          product_id?: number;
+          category?: string;
+          price_at_tracking?: number | null;
+        };
+        Relationships: [];
+      };
+      notification_settings: {
+        Row: NotificationSettingsRow;
+        Insert: {
+          user_id: string;
+          price_drop_percent?: number;
+          email_enabled?: boolean;
+          email_address?: string | null;
+          discord_webhook_url?: string | null;
+          webhook_enabled?: boolean;
+          webhook_url?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          price_drop_percent?: number;
+          email_enabled?: boolean;
+          email_address?: string | null;
+          discord_webhook_url?: string | null;
+          webhook_enabled?: boolean;
+          webhook_url?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       product_price_summary: {
         Row: ProductPriceSummaryRow;
+        Relationships: [];
+      };
+      tracked_product_details: {
+        Row: TrackedProductDetailRow;
         Relationships: [];
       };
     };

@@ -30,6 +30,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# local npm cache used when the default cache is not writable
+/.npm-cache
+
 # env files (NEVER commit secrets)
 .env
 .env.local

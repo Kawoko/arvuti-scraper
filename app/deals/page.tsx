@@ -18,6 +18,7 @@ import {
   type DealsTab,
 } from "@/lib/queries/deals";
 import { getDataFreshness } from "@/lib/queries/stats";
+import { getTrackingContext } from "@/lib/queries/tracked";
 
 export const dynamic = "force-dynamic";
 
@@ -69,10 +70,11 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
   const group: ComponentCategory | undefined =
     rawGroup !== null && isComponentCategory(rawGroup) ? rawGroup : undefined;
 
-  const [deals, counts, freshness] = await Promise.all([
+  const [deals, counts, freshness, tracking] = await Promise.all([
     getDeals(tab, group),
     getDealsTabCounts(group),
     getDataFreshness(),
+    getTrackingContext(),
   ]);
 
   const groupLabel = group ? (CATEGORY_LIST.find((d) => d.category === group)?.label ?? null) : null;
@@ -87,11 +89,8 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
   return (
     <PageShell activePath="/deals">
       <div className="space-y-6">
-        <header className="space-y-1.5">
+        <header>
           <h1 className="text-2xl font-semibold tracking-tight">Deals</h1>
-          <p className="text-sm text-muted-foreground">
-            {`Products ranked by how far they have fallen from the price we first recorded — not by the retailer's own discount label.`}
-          </p>
         </header>
 
         <StaleDataNotice staleDays={freshness.staleDays} />
@@ -125,13 +124,15 @@ export default async function DealsPage({ searchParams }: DealsPageProps) {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {deals.map((row) => (
                 // The same product id can exist in two groups, so both are needed.
-                <DealCard key={`${row.category}-${row.product_id}`} row={row} />
+                <DealCard
+                  key={`${row.category}-${row.product_id}`}
+                  row={row}
+                  trackedKeys={tracking.trackedKeys}
+                  authenticated={tracking.user !== null}
+                  loginNext="/deals"
+                />
               ))}
             </div>
-            <p className="text-center text-xs text-muted-foreground">
-              Showing the top {deals.length} {groupLabel ? `${groupLabel} ` : ""}by percentage
-              reduction from the recorded starting price.
-            </p>
           </>
         )}
       </div>

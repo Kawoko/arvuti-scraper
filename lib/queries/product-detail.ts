@@ -1,4 +1,5 @@
 import type { ComponentCategory } from "@/lib/arvutitark/types";
+import { isComponentCategory } from "@/lib/categories";
 import { getSupabaseReadClient } from "@/lib/supabase/server";
 import type { ProductPriceSummaryRow } from "@/types/database";
 import { DataAccessError } from "./errors";
@@ -30,9 +31,8 @@ function shopStockTotal(shopStock: Record<string, number> | null): number {
 /**
  * Load one product's current stats and its full daily history.
  *
- * Scoped by group as well as product id: the same retailer product can be
- * tracked in two groups (for example in `gpu` and again as a pinned `custom`
- * item), and each group has its own independent history.
+ * Scoped by group as well as product id, so an id belonging to another group
+ * cannot be displayed under the wrong heading.
  */
 export async function getProductDetail(
   productId: number,
@@ -80,4 +80,28 @@ export async function getProductDetail(
   });
 
   return { summary, history };
+}
+
+/**
+ * Every group a product id belongs to.
+ *
+ * Used to rescue a link that points at the wrong group — for example a bookmark
+ * made before the product was re-filed, or one whose group path was lost. When
+ * exactly one group matches, the caller can redirect there instead of 404ing.
+ */
+export async function findProductCategories(productId: number): Promise<ComponentCategory[]> {
+  const supabase = getSupabaseReadClient();
+
+  const { data, error } = await supabase
+    .from("product_price_summary")
+    .select("category")
+    .eq("product_id", productId);
+
+  if (error) {
+    throw new DataAccessError("Failed to look up the product group", error.message);
+  }
+
+  return (data ?? [])
+    .map((row) => row.category)
+    .filter((category): category is ComponentCategory => isComponentCategory(category));
 }

@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import { PAGE_SIZE, minDiscountValue, toNumberOrNull, type ProductFilters } from "@/lib/filters";
 import { getSupabaseReadClient } from "@/lib/supabase/server";
 import type { ComponentCategory } from "@/lib/arvutitark/types";
@@ -211,3 +213,14 @@ export async function getFilterFacets(
     moduleCounts: distinctSorted(rows.map((row) => row.module_count)),
   };
 }
+
+/**
+ * Filter options only change when the catalogue changes, which is at most twice
+ * a day. Caching this for five minutes keeps the toolbar instant without ever
+ * caching a price.
+ */
+export const getFilterFacetsCached = unstable_cache(
+  async (category: ComponentCategory) => getFilterFacets(category),
+  ["filter-facets"],
+  { revalidate: 300, tags: ["catalogue"] },
+);
